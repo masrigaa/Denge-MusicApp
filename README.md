@@ -29,15 +29,25 @@
 ## 📸 Screenshots Showcase
 
 <p align="center">
-  <img src="docs/screenshots/home_screen.jpg" width="31%" alt="Home Screen" />
-  &nbsp;
-  <img src="docs/screenshots/now_playing.jpg" width="31%" alt="Now Playing Screen" />
-  &nbsp;
-  <img src="docs/screenshots/artwork_modal.jpg" width="31%" alt="Artwork Preview & Share" />
+  <img src="docs/screenshots/home_screen.jpg" width="46%" alt="Beranda Pribadi" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/now_playing.jpg" width="46%" alt="Layar Now Playing" />
+</p>
+<p align="center">
+  <sub><i>Beranda Pribadi & Rekomendasi &nbsp;•&nbsp; Layar Pemutar Musik & Antrean Radio</i></sub>
 </p>
 
+<br />
+
 <p align="center">
-  <sub><i>Beranda Pribadi & Rekomendasi &nbsp;•&nbsp; Layar Pemutar & Antrean Radio &nbsp;•&nbsp; Preview Cover HD & Tombol Share</i></sub>
+  <img src="docs/screenshots/artwork_1.jpg" width="31%" alt="HD Artwork Preview 1" />
+  &nbsp;
+  <img src="docs/screenshots/artwork_2.jpg" width="31%" alt="HD Artwork Preview 2" />
+  &nbsp;
+  <img src="docs/screenshots/artwork_3.jpg" width="31%" alt="HD Artwork Preview 3" />
+</p>
+<p align="center">
+  <sub><i>Modal Preview Cover Resolusi Tinggi & Tombol Cepat Salin Link (Share)</i></sub>
 </p>
 
 ---
@@ -85,13 +95,17 @@
 
 ## ⚙️ Persyaratan Sistem
 
+<div align="center">
+
 | Spesifikasi | Kebutuhan Minimum | Rekomendasi |
-|---|---|---|
+|:---|:---:|:---:|
 | **Sistem Operasi** | Android 12 (API 31) | Android 13, 14, 15+ |
 | **Ukuran Aplikasi** | ~35 MB | ~35 MB |
 | **RAM** | 2 GB | 3 GB atau lebih |
 | **Koneksi** | Wi-Fi / Data Seluler (3G/4G/5G) | Koneksi stabil |
 | **Izin Aplikasi** | Akses Internet, Notifikasi Media | Tanpa izin kontak/kamera |
+
+</div>
 
 ---
 
