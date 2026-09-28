@@ -33,7 +33,7 @@ Dokumen ini mendefinisikan **apa** itu Déngé, **siapa** target penggunanya, da
 - **Sapaan Personal**: Badge nama pengguna yang dapat dikustomisasi (misal: "Halo, Asla ☕").
 - **Lagu yang Sering Kamu Putar**: Menampilkan 2 lagu teratas yang paling sering didengarkan lengkap dengan penghitung jumlah pemutaran (*"Diputar X kali"*). Perhitungan ini otomatis di-reset setiap tanggal 1 setiap bulannya.
 - **Baru Saja Diputar**: Daftar horizontal riwayat lagu yang terakhir dimainkan untuk akses instan.
-- **Rekomendasi Genre Pilihan**: 5 seksi genre (J-Pop, Hololive / VTuber, Lofi, Western Pop, Anime OST) yang dapat disesuaikan lewat Pengaturan.
+- **Rekomendasi Genre Pilihan**: Beragam kurasi genre musik yang dapat disesuaikan bebas lewat Pengaturan sesuai selera pengguna.
 
 ### 2.2 Now Playing (Pemutar Penuh)
 - **Album Art HD & Preview**: Menampilkan gambar cover resolusi tinggi. Mengetuk cover akan membuka dialog preview HD.

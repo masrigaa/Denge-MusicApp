@@ -37,8 +37,8 @@ Pemasangan sangat mudah tanpa perlu mendaftar akun atau login:
 3. **Mulai Mendengarkan:**  
    Buka aplikasi **Déngé** dan nikmati jutaan katalog musik tanpa gangguan iklan.
 
-> 💡 **Tips Pengguna Xiaomi / HyperOS / MIUI:**  
-> Agar musik tidak terhenti saat layar HP mati, buka **Setelan HP > Aplikasi > Kelola Aplikasi > Déngé > Penghemat Baterai**, lalu pilih **"Tidak ada pembatasan (No restrictions)"**.
+> 💡 **Tips Pemutaran Latar Belakang:**  
+> Agar pemutaran musik tetap berjalan lancar saat layar HP mati, pastikan pengaturan baterai aplikasi diatur ke **"Tidak ada pembatasan (No restrictions / Unrestricted)"** pada Info Aplikasi di HP kamu.
 
 ---
 
@@ -48,7 +48,7 @@ Pemasangan sangat mudah tanpa perlu mendaftar akun atau login:
   Mengalirkan audio berkualitas tinggi (Opus / AAC) langsung melalui protokol klien YouTube Music. Bebas total dari jeda iklan suara maupun sponsor video.
 
 - **🎧 True Background Playback & Media3**  
-  Dibangun dengan arsitektur modern **AndroidX Media3 (ExoPlayer)** dan Foreground Service bertipe `mediaPlayback`. Musik tetap berjalan stabil saat layar mati atau aplikasi diminimalkan, dilengkapi kontrol lockscreen dan integrasi status bar dinamis (**Xiaomi HyperOS Hyper Island**).
+  Dibangun dengan arsitektur modern **AndroidX Media3 (ExoPlayer)** dan Foreground Service bertipe `mediaPlayback`. Musik tetap berjalan stabil saat layar mati atau aplikasi diminimalkan, dilengkapi kontrol lockscreen dan integrasi status bar dinamis (Dynamic Island / Media Notification).
 
 - **☕ "Brew & Bean" Warm Aesthetic**  
   Antarmuka bertema kopi yang hangat, tenang, dan premium (Espresso, Warm Mocha, Hazelnut, Creamy Latte) berkonsep penuh *Edge-to-Edge* serta transisi halus.
@@ -65,7 +65,7 @@ Pemasangan sangat mudah tanpa perlu mendaftar akun atau login:
   Ketuk album artwork di layar Now Playing untuk membuka modal preview beresolusi tinggi. Tombol **Share** memungkinkanmu menyalin link lagu resmi YouTube / YouTube Music langsung ke clipboard dalam satu sentuhan.
 
 - **🎚️ Audio Equalizer & Curated Genres**  
-  Equalizer audio bawaan dengan berbagai preset (Bass Boost, Vocal, Rock, Flat) serta 5 kurasi genre musik pilihan di Beranda (J-Pop, Hololive / VTuber, Lofi, Western Pop, Anime OST).
+  Equalizer audio bawaan dengan berbagai preset (Bass Boost, Vocal, Rock, Flat) serta kurasi genre musik di Beranda yang dapat disesuaikan bebas sesuai selera mendengarkanmu.
 
 ---
 
