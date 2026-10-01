@@ -59,29 +59,58 @@ class AudioEffectsManager(
     suspend fun ensureDefaultPresets(): EqPresetEntity? {
         val all = eqPresetDao.getAll().first()
         val defaultPresets = listOf(
-            EqPresetEntity(name = "Flat", bandsJson = "[0,0,0,0,0]", isActive = 1, isBuiltin = 1, createdAt = 1),
-            EqPresetEntity(name = "Bass Boost", bandsJson = "[5,3,1,0,0]", isActive = 0, isBuiltin = 1, createdAt = 2),
-            EqPresetEntity(name = "Treble Boost", bandsJson = "[0,0,1,3,5]", isActive = 0, isBuiltin = 1, createdAt = 3),
-            EqPresetEntity(name = "Rock", bandsJson = "[4,2,-1,2,4]", isActive = 0, isBuiltin = 1, createdAt = 4),
-            EqPresetEntity(name = "Pop", bandsJson = "[-1,2,4,2,-1]", isActive = 0, isBuiltin = 1, createdAt = 5),
-            EqPresetEntity(name = "Jazz", bandsJson = "[3,1,0,1,3]", isActive = 0, isBuiltin = 1, createdAt = 6),
+            EqPresetEntity(name = "Flat (Normal)", bandsJson = "[0,0,0,0,0]", isActive = 1, isBuiltin = 1, createdAt = 1),
+            EqPresetEntity(name = "Acoustic", bandsJson = "[4,3,2,3,4]", isActive = 0, isBuiltin = 1, createdAt = 2),
+            EqPresetEntity(name = "Bass Booster", bandsJson = "[9,6,2,0,0]", isActive = 0, isBuiltin = 1, createdAt = 3),
+            EqPresetEntity(name = "Bass Reducer", bandsJson = "[-9,-6,-2,0,0]", isActive = 0, isBuiltin = 1, createdAt = 4),
+            EqPresetEntity(name = "Classical", bandsJson = "[5,3,-1,3,4]", isActive = 0, isBuiltin = 1, createdAt = 5),
+            EqPresetEntity(name = "Dance", bandsJson = "[6,4,1,3,4]", isActive = 0, isBuiltin = 1, createdAt = 6),
+            EqPresetEntity(name = "Deep", bandsJson = "[6,4,0,-2,-4]", isActive = 0, isBuiltin = 1, createdAt = 7),
+            EqPresetEntity(name = "Electronic", bandsJson = "[6,4,0,2,6]", isActive = 0, isBuiltin = 1, createdAt = 8),
+            EqPresetEntity(name = "Hip-Hop", bandsJson = "[7,4,0,2,5]", isActive = 0, isBuiltin = 1, createdAt = 9),
+            EqPresetEntity(name = "Jazz", bandsJson = "[4,2,-1,2,4]", isActive = 0, isBuiltin = 1, createdAt = 10),
+            EqPresetEntity(name = "Latin", bandsJson = "[4,2,0,2,4]", isActive = 0, isBuiltin = 1, createdAt = 11),
+            EqPresetEntity(name = "Loudness", bandsJson = "[8,4,-2,2,7]", isActive = 0, isBuiltin = 1, createdAt = 12),
+            EqPresetEntity(name = "Lounge", bandsJson = "[-3,-1,2,4,1]", isActive = 0, isBuiltin = 1, createdAt = 13),
+            EqPresetEntity(name = "Piano", bandsJson = "[3,2,0,3,4]", isActive = 0, isBuiltin = 1, createdAt = 14),
+            EqPresetEntity(name = "Pop", bandsJson = "[-2,1,4,3,-1]", isActive = 0, isBuiltin = 1, createdAt = 15),
+            EqPresetEntity(name = "R&B", bandsJson = "[3,7,2,2,4]", isActive = 0, isBuiltin = 1, createdAt = 16),
+            EqPresetEntity(name = "Rock", bandsJson = "[6,3,-2,3,6]", isActive = 0, isBuiltin = 1, createdAt = 17),
+            EqPresetEntity(name = "Small Speakers", bandsJson = "[7,5,2,0,-2]", isActive = 0, isBuiltin = 1, createdAt = 18),
+            EqPresetEntity(name = "Spoken Word", bandsJson = "[-4,0,5,3,-2]", isActive = 0, isBuiltin = 1, createdAt = 19),
+            EqPresetEntity(name = "Treble Booster", bandsJson = "[0,0,2,5,9]", isActive = 0, isBuiltin = 1, createdAt = 20),
+            EqPresetEntity(name = "Treble Reducer", bandsJson = "[0,0,-2,-5,-9]", isActive = 0, isBuiltin = 1, createdAt = 21),
+            EqPresetEntity(name = "Vocal Booster", bandsJson = "[-2,0,6,4,1]", isActive = 0, isBuiltin = 1, createdAt = 22),
         )
-        if (all.isEmpty()) {
-            eqPresetDao.upsertAll(defaultPresets)
-            return defaultPresets.first()
-        } else {
-            // Update builtin preset band levels to ensure clean, non-distorting sound
-            val updated = all.map { existing ->
-                if (existing.isBuiltin == 1) {
-                    val matching = defaultPresets.firstOrNull { it.name.equals(existing.name, ignoreCase = true) }
-                    if (matching != null && existing.bandsJson != matching.bandsJson) {
-                        existing.copy(bandsJson = matching.bandsJson)
-                    } else existing
-                } else existing
+        // Detect previously active preset to preserve user selection
+        val activePreset = all.firstOrNull { it.isActive == 1 }
+        val activeName = activePreset?.name?.lowercase()?.trim()
+
+        // Remove any obsolete or duplicate builtins from previous versions (e.g. "Flat", "Bass Boost")
+        eqPresetDao.deleteBuiltins()
+
+        val presetsToInsert = defaultPresets.map { preset ->
+            val isMatchingActive = when (activeName) {
+                "flat", "flat (normal)" -> preset.name.equals("Flat (Normal)", ignoreCase = true)
+                "bass boost", "bass booster" -> preset.name.equals("Bass Booster", ignoreCase = true)
+                "treble boost", "treble booster" -> preset.name.equals("Treble Booster", ignoreCase = true)
+                else -> preset.name.equals(activeName, ignoreCase = true)
             }
-            eqPresetDao.upsertAll(updated)
-            return updated.firstOrNull { it.isActive == 1 } ?: updated.firstOrNull()
+            if (activePreset != null && activePreset.isBuiltin == 0) {
+                // If user had a custom preset active, keep all builtins inactive
+                preset.copy(isActive = 0)
+            } else if (isMatchingActive) {
+                preset.copy(isActive = 1)
+            } else if (activeName == null && preset.name.equals("Flat (Normal)", ignoreCase = true)) {
+                preset.copy(isActive = 1)
+            } else {
+                preset.copy(isActive = 0)
+            }
         }
+
+        eqPresetDao.upsertAll(presetsToInsert)
+        val refreshed = eqPresetDao.getAll().first()
+        return refreshed.firstOrNull { it.isActive == 1 } ?: refreshed.firstOrNull()
     }
 
     fun getPresets(): Flow<List<EqPresetEntity>> {
@@ -118,23 +147,15 @@ class AudioEffectsManager(
             }
 
             val numBands = eq.numberOfBands.toInt()
-            val minEq = eq.bandLevelRange[0] // Typically -1500 mB (-15 dB)
-            val maxEq = eq.bandLevelRange[1] // Typically +1500 mB (+15 dB)
+            val minEq = eq.bandLevelRange[0] // e.g. -1500 mB (-15 dB)
+            val maxEq = eq.bandLevelRange[1] // e.g. +1500 mB (+15 dB)
 
-            // Scale to punchy, warm musical level (+8 to +9 dB max, i.e. 800-900 mB)
-            // Adds +2 to 3 dB over previous setting while maintaining clean headroom
-            val scaledMax = (maxEq * 0.58).coerceIn(700.0, 900.0)
-            val scaledMin = (minEq * 0.58).coerceIn(-900.0, -700.0)
-
+            // Direct decibel-to-millibel mapping matching Spotify's 5-band EQ
+            // Each band value in bands is in dB (-12 to +12 dB = -1200 to +1200 mB)
             bands.forEachIndexed { index, value ->
                 if (index < numBands) {
-                    val fraction = (value / 10.0).coerceIn(-1.0, 1.0)
-                    val level = if (fraction >= 0) {
-                        (fraction * scaledMax).toInt()
-                    } else {
-                        (kotlin.math.abs(fraction) * scaledMin).toInt()
-                    }
-                    eq.setBandLevel(index.toShort(), level.coerceIn(minEq.toInt(), maxEq.toInt()).toShort())
+                    val targetMillibels = (value * 100).coerceIn(minEq.toInt(), maxEq.toInt())
+                    eq.setBandLevel(index.toShort(), targetMillibels.toShort())
                 }
             }
         } catch (_: Exception) {

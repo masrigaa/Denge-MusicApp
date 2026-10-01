@@ -1,5 +1,10 @@
 package com.asla.denge.ui.screens.home
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -47,10 +52,13 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.sp
 import com.asla.denge.ui.components.GenreSelectionDialog
 
 @Composable
@@ -98,11 +106,22 @@ fun HomeScreen(
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-    ) {
+    AnimatedContent(
+        targetState = uiState.isLoading && uiState.genreSections.isEmpty(),
+        transitionSpec = {
+            fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(250))
+        },
+        label = "homeLoadingOrContent",
+        modifier = modifier.fillMaxSize(),
+    ) { isLoading ->
+        if (isLoading) {
+            HomeWaveLoadingBox()
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+            ) {
         // Brew & Bean warm header with soft curve
         Box(
             modifier = Modifier
@@ -165,13 +184,26 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
         ) {
-            if (uiState.isLoading && uiState.genreSections.isEmpty()) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .align(Alignment.Center),
-                    color = MaterialTheme.colorScheme.primary,
-                )
+            if (uiState.genreSections.isEmpty() && uiState.error != null) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = uiState.error ?: "Gagal memuat rekomendasi musik",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = { viewModel.loadGenreFeed() },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        Text("Coba Lagi")
+                    }
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -487,6 +519,8 @@ fun HomeScreen(
         }
     }
 }
+}
+}
 
 @Composable
 private fun rememberGreeting(): String {
@@ -498,3 +532,95 @@ private fun rememberGreeting(): String {
         else -> "Selamat malam"
     }
 }
+
+/**
+ * Centered wave loading card with top and bottom accent lines forming an elegant framed box,
+ * displaying "Déngé" and wave animated "Please wait...".
+ */
+@Composable
+private fun HomeWaveLoadingBox(
+    modifier: Modifier = Modifier,
+) {
+    val transition = rememberInfiniteTransition(label = "waveTransition")
+    val phase by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2f * Math.PI).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1400, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "wavePhase",
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 32.dp),
+        ) {
+            // Seamless large Déngé branding directly on background
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                // Garis atas (lebih tebal dan proporsional)
+                Box(
+                    modifier = Modifier
+                        .width(96.dp)
+                        .height(4.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                // Tulisan Déngé (lebih besar, mantap, dan tegas)
+                Text(
+                    text = "Déngé",
+                    fontSize = 52.sp,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    letterSpacing = 4.sp,
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                // Garis bawah (lebih tebal dan proporsional)
+                Box(
+                    modifier = Modifier
+                        .width(96.dp)
+                        .height(4.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                )
+            }
+
+            Spacer(modifier = Modifier.height(36.dp))
+
+            // Teks animasi gelombang per huruf "Please wait..." (lebih jelas & tebal)
+            val text = "Please wait..."
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                text.forEachIndexed { index, char ->
+                    val charOffset = kotlin.math.sin(phase + index * 0.42f) * 5f
+                    val charAlpha = (0.60f + kotlin.math.sin(phase + index * 0.42f) * 0.40f).coerceIn(0.45f, 1f)
+
+                    Text(
+                        text = char.toString(),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = charAlpha),
+                        modifier = Modifier.graphicsLayer {
+                            translationY = charOffset
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+

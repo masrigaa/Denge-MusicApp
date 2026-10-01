@@ -6,8 +6,10 @@ import com.asla.denge.domain.model.Track
 import com.asla.denge.domain.repository.AuthRepository
 import com.asla.denge.domain.repository.MusicRepository
 import com.asla.denge.player.PlayerManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +36,7 @@ enum class OnboardingStep {
 }
 
 data class HomeUiState(
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val genreSections: List<GenreSection> = emptyList(),
     val showOnboarding: Boolean = false,
     val onboardingStep: OnboardingStep = OnboardingStep.NAME_INPUT,
@@ -49,9 +51,12 @@ class HomeViewModel(
     private val genreRepository: GenreRepository,
 ) : ViewModel() {
 
+    private val isFirstLaunch = !genreRepository.hasCompletedOnboarding()
+
     private val _uiState = MutableStateFlow(
         HomeUiState(
-            showOnboarding = !genreRepository.hasCompletedOnboarding(),
+            isLoading = !isFirstLaunch,
+            showOnboarding = isFirstLaunch,
             onboardingStep = if (authRepository.hasCustomUserName()) OnboardingStep.GENRE_SELECTION else OnboardingStep.NAME_INPUT,
             availableGenres = genreRepository.getAllGenres(),
         )
@@ -127,13 +132,12 @@ class HomeViewModel(
             }
 
             try {
-                // Fetch each selected genre cleanly
-                val sections = mutableListOf<GenreSection>()
-                for (genre in selectedGenres) {
-                    try {
-                        val tracks = musicRepository.getGenreTracks(genre.searchQuery).take(5)
-                        if (tracks.isNotEmpty()) {
-                            sections.add(
+                // Fetch all selected genres in parallel via Dispatchers.IO for 5x speedup
+                val sections = selectedGenres.map { genre ->
+                    async(Dispatchers.IO) {
+                        try {
+                            val tracks = musicRepository.getGenreTracks(genre.searchQuery).take(5)
+                            if (tracks.isNotEmpty()) {
                                 GenreSection(
                                     id = genre.id,
                                     title = "${genre.icon} ${genre.name}",
@@ -141,10 +145,12 @@ class HomeViewModel(
                                     icon = genre.icon,
                                     tracks = tracks,
                                 )
-                            )
+                            } else null
+                        } catch (_: Exception) {
+                            null
                         }
-                    } catch (_: Exception) {}
-                }
+                    }
+                }.awaitAll().filterNotNull()
 
                 _uiState.update { it.copy(isLoading = false, genreSections = sections) }
             } catch (e: Exception) {

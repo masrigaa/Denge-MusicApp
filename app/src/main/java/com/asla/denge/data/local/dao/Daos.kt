@@ -179,6 +179,15 @@ interface SearchHistoryDao {
     @Query("SELECT * FROM search_history ORDER BY searched_at DESC LIMIT 20")
     fun getRecent(): Flow<List<SearchHistoryEntity>>
 
+    @Query("DELETE FROM search_history WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
+    @Query("DELETE FROM search_history WHERE query = :query")
+    suspend fun deleteByQuery(query: String)
+
+    @Query("DELETE FROM search_history")
+    suspend fun clearAll()
+
     @Query("DELETE FROM search_history WHERE id NOT IN (SELECT id FROM search_history ORDER BY searched_at DESC LIMIT 50)")
     suspend fun trimOldEntries()
 }
@@ -202,6 +211,9 @@ interface EqPresetDao {
 
     @Query("UPDATE eq_presets SET is_active = 1 WHERE id = :presetId")
     suspend fun activate(presetId: Long)
+
+    @Query("DELETE FROM eq_presets WHERE is_builtin = 1")
+    suspend fun deleteBuiltins()
 
     @Query("DELETE FROM eq_presets WHERE id = :presetId AND is_builtin = 0")
     suspend fun delete(presetId: Long)

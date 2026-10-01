@@ -209,6 +209,14 @@ class PlayerManager(
                                 return
                             }
                         }
+                        if (_playerState.value.repeatMode == RepeatMode.ONE) {
+                            val current = _playerState.value.currentTrack
+                            if (current != null) {
+                                lastKnownPositionMs = 0L
+                                loadAndPlay(current, startPositionMs = 0L)
+                                return
+                            }
+                        }
                         lastKnownPositionMs = 0L
                         playNext()
                     }
@@ -374,9 +382,11 @@ class PlayerManager(
                     onAudioSessionIdAvailable?.invoke(sessionId)
                 }
 
-                // Background fetch related tracks (auto-populate queue with smart radio if queue is small)
-                val shouldForceRadio = _playerState.value.queue.size <= 1
-                fetchRelatedTracksInternal(track, force = shouldForceRadio)
+                // Background fetch related tracks (only when repeat is OFF to lock playlist during loop)
+                if (_playerState.value.repeatMode == RepeatMode.OFF) {
+                    val shouldForceRadio = _playerState.value.queue.size <= 1
+                    fetchRelatedTracksInternal(track, force = shouldForceRadio)
+                }
 
                 // Pre-fetch artwork for the next track in queue to ensure 0ms instant notification update
                 scope.launch(Dispatchers.IO) {
@@ -508,9 +518,11 @@ class PlayerManager(
     }
 
     private fun fetchRelatedTracksInternal(track: Track, force: Boolean = false) {
+        if (_playerState.value.repeatMode != RepeatMode.OFF) return
         relatedJob?.cancel()
         relatedJob = scope.launch {
             try {
+                if (_playerState.value.repeatMode != RepeatMode.OFF) return@launch
                 val currentQueue = _playerState.value.queue
                 val currentIndex = _playerState.value.currentIndex
                 val remainingAhead = (currentQueue.size - 1 - currentIndex).coerceAtLeast(0)
@@ -520,6 +532,7 @@ class PlayerManager(
                     val related = withContext(Dispatchers.IO) {
                         musicRepository.getRelatedTracks(track.videoId, track.artistName, track.title)
                     }
+                    if (_playerState.value.repeatMode != RepeatMode.OFF) return@launch
                     if (related.isNotEmpty()) {
                         val latestQueue = _playerState.value.queue
                         val countToAdd = if (force || latestQueue.size <= 2) 10 else 5
@@ -596,8 +609,18 @@ class PlayerManager(
                 )
             }
             loadAndPlay(nextTrack, startPositionMs = 0L)
-        } else {
-            // Queue is exhausted: fetch related and auto-play seamlessly like YouTube Music
+        } else if (currentState.repeatMode == RepeatMode.ALL && queue.isNotEmpty()) {
+            // Loop back to the beginning of the playlist/queue without adding new tracks
+            val firstTrack = queue[0]
+            _playerState.update {
+                it.copy(
+                    currentTrack = firstTrack,
+                    currentIndex = 0,
+                )
+            }
+            loadAndPlay(firstTrack, startPositionMs = 0L)
+        } else if (currentState.repeatMode == RepeatMode.OFF) {
+            // Queue is exhausted & repeat is OFF: fetch related and auto-play seamlessly
             scope.launch {
                 val current = currentState.currentTrack
                 if (current != null) {
@@ -624,18 +647,7 @@ class PlayerManager(
                             )
                         }
                         loadAndPlay(nextTrack, startPositionMs = 0L)
-                        return@launch
                     }
-                }
-                if (currentState.repeatMode == RepeatMode.ALL && queue.isNotEmpty()) {
-                    val firstTrack = queue[0]
-                    _playerState.update {
-                        it.copy(
-                            currentTrack = firstTrack,
-                            currentIndex = 0,
-                        )
-                    }
-                    loadAndPlay(firstTrack, startPositionMs = 0L)
                 }
             }
         }
@@ -772,10 +784,13 @@ class PlayerManager(
             RepeatMode.ALL -> RepeatMode.ONE
             RepeatMode.ONE -> RepeatMode.OFF
         }
+        if (nextMode != RepeatMode.OFF) {
+            relatedJob?.cancel()
+            _playerState.update { it.copy(isLoadingRadio = false) }
+        }
         exoPlayer.repeatMode = when (nextMode) {
-            RepeatMode.OFF -> Player.REPEAT_MODE_OFF
             RepeatMode.ONE -> Player.REPEAT_MODE_ONE
-            RepeatMode.ALL -> Player.REPEAT_MODE_ALL
+            else -> Player.REPEAT_MODE_OFF
         }
         _playerState.update { it.copy(repeatMode = nextMode) }
     }

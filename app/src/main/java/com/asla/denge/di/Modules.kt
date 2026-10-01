@@ -98,7 +98,7 @@ val playerModule = module {
 
     viewModel { PlayerViewModel(playerManager = get(), musicRepository = get()) }
     viewModel { HomeViewModel(musicRepository = get(), playerManager = get(), authRepository = get(), genreRepository = get()) }
-    viewModel { SearchViewModel(musicRepository = get(), playerManager = get()) }
+    viewModel { SearchViewModel(musicRepository = get(), playerManager = get(), searchHistoryDao = get()) }
     viewModel { LibraryViewModel(musicRepository = get(), playerManager = get()) }
     viewModel { SettingsViewModel(authRepository = get(), audioEffectsManager = get(), musicRepository = get(), genreRepository = get()) }
 }

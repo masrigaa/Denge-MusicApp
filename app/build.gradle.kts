@@ -14,8 +14,8 @@ android {
         applicationId = "com.asla.denge"
         minSdk = 31
         targetSdk = 36
-        versionCode = 132
-        versionName = "1.3.2"
+        versionCode = 144
+        versionName = "1.4.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -130,3 +130,16 @@ dependencies {
     androidTestImplementation(composeBom)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 }
+
+// ── Auto-copy APK directly to project root as Denge.apk ──
+afterEvaluate {
+    tasks.findByName("assembleDebug")?.doLast {
+        val src = layout.buildDirectory.file("outputs/apk/debug/app-debug.apk").get().asFile
+        val dest = File(rootDir, "Denge.apk")
+        if (src.exists()) {
+            src.copyTo(dest, overwrite = true)
+            println(">>> Denge.apk successfully updated at ${dest.absolutePath}")
+        }
+    }
+}
+
