@@ -41,13 +41,13 @@ class CrashActivity : ComponentActivity() {
                     ) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
-                            text = "Déngé Mengalami Kendala ⚠️",
+                            text = "Déngé Ran Into an Issue ⚠️",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFFFCC80)
                         )
                         Text(
-                            text = "Aplikasi terhenti tak terduga. Salin laporan di bawah untuk perbaikan cepat:",
+                            text = "The app encountered an unexpected issue. Copy the report below for quick troubleshooting:",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFFE0D5D0)
                         )
@@ -76,12 +76,12 @@ class CrashActivity : ComponentActivity() {
                                 onClick = {
                                     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                     clipboard.setPrimaryClip(ClipData.newPlainText("Crash Log", error))
-                                    Toast.makeText(this@CrashActivity, "Laporan disalin!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this@CrashActivity, "Report copied to clipboard!", Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF704214))
                             ) {
-                                Text("Salin Laporan 📋", color = Color.White)
+                                Text("Copy Report 📋", color = Color.White)
                             }
 
                             Button(
@@ -95,7 +95,7 @@ class CrashActivity : ComponentActivity() {
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8D6E63))
                             ) {
-                                Text("Buka Ulang 🔄", color = Color.White)
+                                Text("Restart App 🔄", color = Color.White)
                             }
                         }
                     }

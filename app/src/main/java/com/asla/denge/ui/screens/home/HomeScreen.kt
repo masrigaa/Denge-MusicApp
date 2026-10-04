@@ -89,7 +89,7 @@ fun HomeScreen(
                         viewModel.submitOnboardingName(name)
                     },
                     onSkip = {
-                        viewModel.submitOnboardingName("Sobat Musik")
+                        viewModel.submitOnboardingName("Music Lover")
                     }
                 )
             }
@@ -142,14 +142,14 @@ fun HomeScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = if (userName.isNotBlank()) "Halo, $userName 🎵" else "$greeting 🎵",
+                            text = if (userName.isNotBlank()) "Hello, $userName 🎵" else "$greeting 🎵",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Déngé • Musik Tanpa Batas & Bebas Iklan",
+                            text = "Déngé • Unlimited & Ad-Free Music",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -191,7 +191,7 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = uiState.error ?: "Gagal memuat rekomendasi musik",
+                        text = uiState.error ?: "Failed to load music recommendations",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -201,7 +201,7 @@ fun HomeScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                         shape = RoundedCornerShape(12.dp),
                     ) {
-                        Text("Coba Lagi")
+                        Text("Try Again")
                     }
                 }
             } else {
@@ -209,7 +209,7 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    // 1. Baru Saja Diputar (1-3 lagu terakhir)
+                    // 1. Recently Played (1-3 lagu terakhir)
                     if (history.isNotEmpty()) {
                         item {
                             Spacer(modifier = Modifier.height(4.dp))
@@ -228,13 +228,13 @@ fun HomeScreen(
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Column {
                                         Text(
-                                            text = "Baru Saja Diputar",
+                                            text = "Recently Played",
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.onSurface,
                                         )
                                         Text(
-                                            text = "Lanjutkan mendengarkan lagu favorit Anda",
+                                            text = "Continue listening to your favorite songs",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
@@ -292,13 +292,13 @@ fun HomeScreen(
                                         Spacer(modifier = Modifier.width(10.dp))
                                         Column {
                                             Text(
-                                                text = "Sering Kamu Putar 🔥",
+                                                text = "Your Top Plays 🔥",
                                                 style = MaterialTheme.typography.titleMedium,
                                                 fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.onSurface,
                                             )
                                             Text(
-                                                text = "Lagu yang paling sering menemani harimu",
+                                                text = "Songs that keep you company the most",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             )
@@ -319,7 +319,7 @@ fun HomeScreen(
                                             modifier = Modifier.size(16.dp),
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Putar", style = MaterialTheme.typography.labelMedium)
+                                        Text("Play", style = MaterialTheme.typography.labelMedium)
                                     }
                                 }
 
@@ -339,7 +339,7 @@ fun HomeScreen(
                         }
                     }
 
-                    // 3. Karena Kamu Menyukai... (Rekomendasi Berdasarkan Lagu Favorit)
+                    // 3. Because You Liked... (Rekomendasi Berdasarkan Lagu Favorit)
                     val recPair = recommendedFromLiked
                     if (recPair != null && recPair.second.isNotEmpty()) {
                         val (likedTrack, recTracks) = recPair
@@ -378,7 +378,7 @@ fun HomeScreen(
                                         Spacer(modifier = Modifier.width(10.dp))
                                         Column {
                                             Text(
-                                                text = "Karena Menyukai \"${likedTrack.title}\"",
+                                                text = "Because you liked \"${likedTrack.title}\"",
                                                 style = MaterialTheme.typography.titleMedium,
                                                 fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.onSurface,
@@ -386,7 +386,7 @@ fun HomeScreen(
                                                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                                             )
                                             Text(
-                                                text = "Rekomendasi mirip selera favoritmu 💖",
+                                                text = "Recommendations matching your taste 💖",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             )
@@ -407,7 +407,7 @@ fun HomeScreen(
                                             modifier = Modifier.size(16.dp),
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Putar", style = MaterialTheme.typography.labelMedium)
+                                        Text("Play", style = MaterialTheme.typography.labelMedium)
                                     }
                                 }
 
@@ -491,7 +491,7 @@ fun HomeScreen(
                                             modifier = Modifier.size(16.dp),
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Putar", style = MaterialTheme.typography.labelMedium)
+                                        Text("Play", style = MaterialTheme.typography.labelMedium)
                                     }
                                 }
                             }
@@ -526,10 +526,10 @@ fun HomeScreen(
 private fun rememberGreeting(): String {
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     return when (hour) {
-        in 4..11 -> "Selamat pagi"
-        in 12..16 -> "Selamat siang"
-        in 17..20 -> "Selamat sore"
-        else -> "Selamat malam"
+        in 4..11 -> "Good morning"
+        in 12..16 -> "Good afternoon"
+        in 17..20 -> "Good evening"
+        else -> "Good night"
     }
 }
 

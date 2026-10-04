@@ -72,7 +72,7 @@ fun GenreSelectionDialog(
             onDismissRequest = { showAddCustomDialog = false },
             title = {
                 Text(
-                    text = "Tambah Genre Kustom ✍️",
+                    text = "Add Custom Genre ✍️",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -81,7 +81,7 @@ fun GenreSelectionDialog(
             text = {
                 Column {
                     Text(
-                        text = "Ketik nama genre atau artis/tema favorit Anda (contoh: Hololive, Ado, Vocaloid, Synthwave)",
+                        text = "Enter a genre name, artist, or theme (e.g. Hololive, Ado, Synthwave, Lofi)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -89,8 +89,8 @@ fun GenreSelectionDialog(
                     OutlinedTextField(
                         value = customGenreName,
                         onValueChange = { customGenreName = it },
-                        label = { Text("Nama Genre") },
-                        placeholder = { Text("Contoh: Hololive / Ado") },
+                        label = { Text("Genre Name") },
+                        placeholder = { Text("e.g. Hololive / Ado") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -103,8 +103,8 @@ fun GenreSelectionDialog(
                     OutlinedTextField(
                         value = customSearchQuery,
                         onValueChange = { customSearchQuery = it },
-                        label = { Text("Kata Kunci Pencarian (Opsional)") },
-                        placeholder = { Text("Contoh: hololive original songs") },
+                        label = { Text("Search Keywords (Optional)") },
+                        placeholder = { Text("e.g. hololive original songs") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -123,7 +123,7 @@ fun GenreSelectionDialog(
                                 customGenreName.trim(),
                                 customSearchQuery.trim().ifBlank { customGenreName.trim() }
                             )
-                            Toast.makeText(context, "Genre '$customGenreName' berhasil ditambahkan! ✨", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Genre '$customGenreName' added successfully! ✨", Toast.LENGTH_SHORT).show()
                             customGenreName = ""
                             customSearchQuery = ""
                             showAddCustomDialog = false
@@ -135,12 +135,12 @@ fun GenreSelectionDialog(
                     ),
                     shape = RoundedCornerShape(10.dp),
                 ) {
-                    Text("Tambah")
+                    Text("Add")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddCustomDialog = false }) {
-                    Text("Batal")
+                    Text("Cancel")
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -169,14 +169,14 @@ fun GenreSelectionDialog(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (isFirstTimeOnboarding) "Pilih Genre Favoritmu 🎵" else "Kelola Genre Beranda ⚙️",
+                        text = if (isFirstTimeOnboarding) "Choose Favorite Genres 🎵" else "Manage Home Genres ⚙️",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Pilih 1 - 5 genre musik untuk Beranda ($selectedCount/5 terpilih)",
+                        text = "Choose 1 - 5 music genres for Home ($selectedCount/5 selected)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -185,7 +185,7 @@ fun GenreSelectionDialog(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Tutup",
+                            contentDescription = "Close",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -217,7 +217,7 @@ fun GenreSelectionDialog(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "+ Tambah Genre Kustom (Ketik Sendiri)",
+                            text = "+ Add Custom Genre",
                             fontWeight = FontWeight.SemiBold,
                         )
                     }
@@ -225,7 +225,7 @@ fun GenreSelectionDialog(
 
                 item {
                     Text(
-                        text = "PILIHAN GENRE TERSEDIA (MAKS. 5)",
+                        text = "AVAILABLE GENRES (MAX 5)",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
@@ -254,7 +254,7 @@ fun GenreSelectionDialog(
                                     )
                                     .clickable {
                                         if (!isSelected && selectedCount >= 5) {
-                                            Toast.makeText(context, "Maksimal memilih 5 genre musik! 🎵", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "You can select up to 5 genres! 🎵", Toast.LENGTH_SHORT).show()
                                         } else {
                                             onToggleGenre(genre.id)
                                         }
@@ -290,7 +290,7 @@ fun GenreSelectionDialog(
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Icon(
                                             imageVector = Icons.Default.DeleteOutline,
-                                            contentDescription = "Hapus",
+                                            contentDescription = "Delete",
                                             tint = if (isSelected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.error,
                                             modifier = Modifier
                                                 .size(16.dp)
@@ -308,7 +308,7 @@ fun GenreSelectionDialog(
             Button(
                 onClick = {
                     if (selectedCount == 0) {
-                        Toast.makeText(context, "Pilih minimal 1 genre musik! 🎵", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Select at least 1 music genre! 🎵", Toast.LENGTH_SHORT).show()
                     } else {
                         onConfirm()
                     }
@@ -319,13 +319,13 @@ fun GenreSelectionDialog(
                 ),
                 shape = RoundedCornerShape(12.dp),
             ) {
-                Text(if (isFirstTimeOnboarding) "Mulai Mendengarkan 🚀" else "Simpan Pilihan ✨")
+                Text(if (isFirstTimeOnboarding) "Start Listening 🚀" else "Save Selection ✨")
             }
         },
         dismissButton = {
             if (!isFirstTimeOnboarding) {
                 TextButton(onClick = onDismiss) {
-                    Text("Batal")
+                    Text("Cancel")
                 }
             }
         },

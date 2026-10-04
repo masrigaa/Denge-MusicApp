@@ -83,7 +83,7 @@ fun LibraryScreen(
             onDismissRequest = { showCreatePlaylistDialog = false },
             title = {
                 Text(
-                    text = "Buat Playlist Baru",
+                    text = "Create New Playlist",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -91,7 +91,7 @@ fun LibraryScreen(
             text = {
                 Column {
                     Text(
-                        text = "Beri nama untuk playlist musik favorit Anda.",
+                        text = "Enter a name for your custom playlist.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -99,8 +99,8 @@ fun LibraryScreen(
                     OutlinedTextField(
                         value = newPlaylistName,
                         onValueChange = { newPlaylistName = it },
-                        label = { Text("Nama Playlist") },
-                        placeholder = { Text("Contoh: Chill Beats, Rock Favorit") },
+                        label = { Text("Playlist Name") },
+                        placeholder = { Text("e.g. Chill Beats, Acoustic Vibes") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -122,12 +122,12 @@ fun LibraryScreen(
                     ),
                     shape = RoundedCornerShape(12.dp),
                 ) {
-                    Text("Buat Playlist")
+                    Text("Create Playlist")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCreatePlaylistDialog = false }) {
-                    Text("Batal")
+                    Text("Cancel")
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -160,7 +160,7 @@ fun LibraryScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.DeleteOutline,
-                                contentDescription = "Hapus Playlist",
+                                contentDescription = "Delete Playlist",
                                 tint = MaterialTheme.colorScheme.error,
                             )
                         }
@@ -170,14 +170,14 @@ fun LibraryScreen(
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "${playlistTracks.size} lagu di playlist ini",
+                        text = if (playlistTracks.size == 1) "1 track in this playlist" else "${playlistTracks.size} tracks in this playlist",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     if (playlistTracks.isEmpty()) {
                         Text(
-                            text = "Belum ada lagu di playlist ini. Anda bisa menambahkan lagu dari Player atau rekomendasi.",
+                            text = "No tracks in this playlist yet. Add songs from Player or recommendations.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(vertical = 16.dp),
@@ -216,13 +216,13 @@ fun LibraryScreen(
                     ) {
                         Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Putar Semua")
+                        Text("Play All")
                     }
                 }
             },
             dismissButton = {
                 TextButton(onClick = { selectedPlaylistForDetail = null }) {
-                    Text("Tutup")
+                    Text("Close")
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -295,8 +295,8 @@ fun LibraryScreen(
                         if (playlists.isEmpty()) {
                             EmptyStateView(
                                 icon = Icons.AutoMirrored.Filled.QueueMusic,
-                                title = "Belum Ada Playlist",
-                                description = "Buat playlist pertama Anda dengan menekan tombol + di bawah.",
+                                title = "No Playlists Yet",
+                                description = "Create your first playlist using the + button below.",
                             )
                         } else {
                             LazyColumn(
@@ -319,8 +319,8 @@ fun LibraryScreen(
                         if (likedSongs.isEmpty()) {
                             EmptyStateView(
                                 icon = Icons.Default.Favorite,
-                                title = "Belum Ada Lagu yang Disukai",
-                                description = "Sentuh tombol hati ❤️ di player untuk menambahkan lagu favorit Anda ke daftar ini.",
+                                title = "No Liked Songs Yet",
+                                description = "Tap the heart ❤️ button in the player to add your favorite songs here.",
                             )
                         } else {
                             LazyColumn(
@@ -335,7 +335,7 @@ fun LibraryScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Text(
-                                            text = "${likedSongs.size} Lagu Disukai",
+                                            text = if (likedSongs.size == 1) "1 Liked Song" else "${likedSongs.size} Liked Songs",
                                             style = MaterialTheme.typography.bodyMedium,
                                             fontWeight = FontWeight.SemiBold,
                                             color = MaterialTheme.colorScheme.primary,
@@ -354,7 +354,7 @@ fun LibraryScreen(
                                                 modifier = Modifier.size(16.dp),
                                             )
                                             Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Putar Semua")
+                                            Text("Play All")
                                         }
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
@@ -376,8 +376,8 @@ fun LibraryScreen(
                         if (history.isEmpty()) {
                             EmptyStateView(
                                 icon = Icons.Default.History,
-                                title = "Belum Ada Riwayat",
-                                description = "Lagu yang Anda putar akan otomatis muncul di sini.",
+                                title = "No Listening History",
+                                description = "Songs you play will automatically appear here.",
                             )
                         } else {
                             LazyColumn(
@@ -392,7 +392,7 @@ fun LibraryScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Text(
-                                            text = "${history.size} Lagu Terakhir Diputar",
+                                            text = if (history.size == 1) "1 Recently Played Song" else "${history.size} Recently Played Songs",
                                             style = MaterialTheme.typography.bodyMedium,
                                             fontWeight = FontWeight.SemiBold,
                                             color = MaterialTheme.colorScheme.primary,
@@ -411,7 +411,7 @@ fun LibraryScreen(
                                                 modifier = Modifier.size(16.dp),
                                             )
                                             Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Putar Semua")
+                                            Text("Play All")
                                         }
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
@@ -450,9 +450,9 @@ fun LibraryScreen(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Buat Playlist")
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Create Playlist")
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Buat Playlist", fontWeight = FontWeight.Bold)
+                    Text("Create Playlist", fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -498,7 +498,7 @@ private fun PlaylistItemView(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "${playlist.trackCount} lagu",
+                text = if (playlist.trackCount == 1) "1 track" else "${playlist.trackCount} tracks",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

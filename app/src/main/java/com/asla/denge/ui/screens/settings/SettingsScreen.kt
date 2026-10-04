@@ -20,9 +20,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -77,13 +77,13 @@ fun SettingsScreen(
         )
     }
 
-    // Dialog Ubah Nama Pengguna
+    // Dialog Edit Profile Name
     if (showEditNameDialog) {
         AlertDialog(
             onDismissRequest = { showEditNameDialog = false },
             title = {
                 Text(
-                    text = "Ubah Nama Pengguna",
+                    text = "Edit Profile Name",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -91,7 +91,7 @@ fun SettingsScreen(
             text = {
                 Column {
                     Text(
-                        text = "Nama ini akan ditampilkan sebagai sapaan hangat di beranda aplikasi.",
+                        text = "This name will be displayed as a warm greeting on your Home screen.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -99,8 +99,8 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = inputName,
                         onValueChange = { inputName = it },
-                        label = { Text("Nama Pengguna") },
-                        placeholder = { Text("Contoh: Ghina, Reza, Sobat Musik") },
+                        label = { Text("Profile Name") },
+                        placeholder = { Text("e.g. Ghina, Reza, Music Lover") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -121,12 +121,12 @@ fun SettingsScreen(
                     ),
                     shape = RoundedCornerShape(12.dp),
                 ) {
-                    Text("Simpan")
+                    Text("Save")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showEditNameDialog = false }) {
-                    Text("Batal")
+                    Text("Cancel")
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -157,7 +157,7 @@ fun SettingsScreen(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Brew & Bean Coffee Style",
+                    text = "Profile & App Customization",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -203,34 +203,15 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(14.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    text = userName,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.weight(1f, fill = false),
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                androidx.compose.material3.IconButton(
-                                    onClick = {
-                                        inputName = userName
-                                        showEditNameDialog = true
-                                    },
-                                    modifier = Modifier.size(28.dp),
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = "Ubah Nama",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp),
-                                    )
-                                }
-                            }
                             Text(
-                                text = "Pengaturan Profil & Personalisasi",
+                                text = userName,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Local Profile • Ad-Free Listener",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -253,7 +234,7 @@ fun SettingsScreen(
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Ubah Nama Panggilan")
+                        Text("Edit Profile Name")
                     }
                 }
             }
@@ -264,7 +245,7 @@ fun SettingsScreen(
 
             // 1. Box Pengaturan (Interaktif: Genre & Equalizer)
             Text(
-                text = "PENGATURAN MUSIK",
+                text = "MUSIC SETTINGS",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -280,8 +261,8 @@ fun SettingsScreen(
             ) {
                 Column {
                     SettingsRow(
-                        title = "Kelola Genre Beranda",
-                        value = "${availableGenres.count { it.isSelected }} terpilih 🎵",
+                        title = "Manage Home Genres",
+                        value = "${availableGenres.count { it.isSelected }} selected 🎵",
                         onClick = { showGenreDialog = true },
                         isInteractive = true,
                     )
@@ -299,7 +280,7 @@ fun SettingsScreen(
 
             // 2. Box Informasi Aplikasi (Hanya Info: Tema, Kualitas, Versi)
             Text(
-                text = "INFORMASI APLIKASI",
+                text = "APPLICATION INFO",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -315,7 +296,7 @@ fun SettingsScreen(
             ) {
                 Column {
                     SettingsRow(
-                        title = "Tema Aplikasi",
+                        title = "App Theme",
                         value = "Brew & Bean Coffee ☕",
                         onClick = null,
                         isInteractive = false,
@@ -342,7 +323,7 @@ fun SettingsScreen(
     if (showEqDialog) {
         AlertDialog(
             onDismissRequest = { showEqDialog = false },
-            title = { Text(text = "Equalizer Preset", color = MaterialTheme.colorScheme.onSurface) },
+            title = { Text(text = "Equalizer Presets", color = MaterialTheme.colorScheme.onSurface) },
             text = {
                 LazyColumn {
                     items(eqPresets, key = { it.id }) { preset ->
@@ -377,7 +358,7 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showEqDialog = false }) {
-                    Text("Tutup", color = MaterialTheme.colorScheme.primary)
+                    Text("Close", color = MaterialTheme.colorScheme.primary)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -427,7 +408,7 @@ private fun SettingsRow(
             if (isInteractive) {
                 Spacer(modifier = Modifier.width(6.dp))
                 Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp),

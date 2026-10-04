@@ -28,9 +28,9 @@ import androidx.compose.ui.window.DialogProperties
 fun NameInputDialog(
     initialName: String = "",
     onConfirm: (String) -> Unit,
-    onSkip: () -> Unit = { onConfirm("Sobat Musik") },
+    onSkip: () -> Unit = { onConfirm("Music Lover") },
 ) {
-    var text by remember { mutableStateOf(if (initialName == "Sobat Musik") "" else initialName) }
+    var text by remember { mutableStateOf(if (initialName == "Sobat Musik" || initialName == "Music Lover") "" else initialName) }
 
     Dialog(
         onDismissRequest = { /* Prevent dismiss on first-time setup */ },
@@ -76,7 +76,7 @@ fun NameInputDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Selamat Datang di Déngé 🎧",
+                    text = "Welcome to Déngé 🎧",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -85,7 +85,7 @@ fun NameInputDialog(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "Biar kami bisa menyapamu dengan lebih akrab, siapa nama panggilanmu?",
+                    text = "To personalize your experience, what should we call you?",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -100,7 +100,7 @@ fun NameInputDialog(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = {
-                        Text("Nama panggilanmu...")
+                        Text("Your name or nickname...")
                     },
                     leadingIcon = {
                         Icon(
@@ -114,7 +114,7 @@ fun NameInputDialog(
                             IconButton(onClick = { text = "" }) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
-                                    contentDescription = "Hapus",
+                                    contentDescription = "Clear",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
@@ -132,7 +132,7 @@ fun NameInputDialog(
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = {
-                            val chosen = text.trim().ifBlank { "Sobat Musik" }
+                            val chosen = text.trim().ifBlank { "Music Lover" }
                             onConfirm(chosen)
                         }
                     ),
@@ -142,7 +142,7 @@ fun NameInputDialog(
 
                 Button(
                     onClick = {
-                        val chosen = text.trim().ifBlank { "Sobat Musik" }
+                        val chosen = text.trim().ifBlank { "Music Lover" }
                         onConfirm(chosen)
                     },
                     modifier = Modifier
@@ -155,7 +155,7 @@ fun NameInputDialog(
                     ),
                 ) {
                     Text(
-                        text = "Lanjut Pilih Genre 🎵",
+                        text = "Continue to Genres 🎵",
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
@@ -167,7 +167,7 @@ fun NameInputDialog(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
-                        text = "Lewati (Gunakan Sobat Musik)",
+                        text = "Skip (Use Music Lover)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

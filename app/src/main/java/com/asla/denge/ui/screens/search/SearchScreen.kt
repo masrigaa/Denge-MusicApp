@@ -145,14 +145,14 @@ fun SearchScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(
-                                    text = "Pencarian Terakhir",
+                                    text = "Recent Searches",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 TextButton(onClick = { viewModel.clearAllHistory() }) {
                                     Text(
-                                        text = "Hapus Semua",
+                                        text = "Clear All",
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.primary,
                                     )
@@ -197,7 +197,7 @@ fun SearchScreen(
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Close,
-                                            contentDescription = "Hapus",
+                                            contentDescription = "Delete",
                                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                             modifier = Modifier.size(16.dp),
                                         )
@@ -207,7 +207,7 @@ fun SearchScreen(
                         }
                     } else {
                         Text(
-                            text = "Cari lagu, artis, atau album favoritmu 🎵",
+                            text = "Search for your favorite songs, artists, or albums 🎵",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier

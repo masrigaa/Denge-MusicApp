@@ -166,9 +166,9 @@ fun PlayerScreen(
                         onClick = {
                             val shareUrl = "https://music.youtube.com/watch?v=${track.videoId}"
                             val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
-                            val clip = android.content.ClipData.newPlainText("YouTube Music Link", shareUrl)
+                            val clip = android.content.ClipData.newPlainText("Music Link", shareUrl)
                             clipboard?.setPrimaryClip(clip)
-                            android.widget.Toast.makeText(context, "Tautan berhasil disalin!", android.widget.Toast.LENGTH_SHORT).show()
+                            android.widget.Toast.makeText(context, "Link copied to clipboard!", android.widget.Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
@@ -188,7 +188,7 @@ fun PlayerScreen(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    // Tombol Tutup di sebelah kanan (ke kananin) dengan jarak vertikal yang pas dan rapi
+                    // Close Button
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End,
@@ -197,7 +197,7 @@ fun PlayerScreen(
                             onClick = { showHdPreview = false },
                         ) {
                             Text(
-                                text = "Tutup",
+                                text = "Close",
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary,
                             )
@@ -217,7 +217,7 @@ fun PlayerScreen(
             },
             title = {
                 Text(
-                    text = "Tambah ke Playlist",
+                    text = "Add to Playlist",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -226,7 +226,7 @@ fun PlayerScreen(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     if (isCreatingNewPlaylist) {
                         Text(
-                            text = "Beri nama untuk playlist baru:",
+                            text = "Enter a name for the new playlist:",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -234,15 +234,15 @@ fun PlayerScreen(
                         OutlinedTextField(
                             value = newPlaylistName,
                             onValueChange = { newPlaylistName = it },
-                            label = { Text("Nama Playlist") },
-                            placeholder = { Text("Contoh: Lagu Pengantar Tidur") },
+                            label = { Text("Playlist Name") },
+                            placeholder = { Text("e.g. Bedtime Tracks, Chill Beats") },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                         )
                     } else {
                         Text(
-                            text = "Pilih playlist tujuan:",
+                            text = "Select target playlist:",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -250,7 +250,7 @@ fun PlayerScreen(
                         val customPlaylists = userPlaylists.filter { it.isEditable }
                         if (customPlaylists.isEmpty()) {
                             Text(
-                                text = "Belum ada playlist kustom. Klik tombol di bawah untuk membuat playlist baru.",
+                                text = "No custom playlists yet. Tap the button below to create one.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(vertical = 12.dp),
@@ -311,7 +311,7 @@ fun PlayerScreen(
                         ),
                         shape = RoundedCornerShape(12.dp),
                     ) {
-                        Text("Simpan")
+                        Text("Save")
                     }
                 } else {
                     Button(
@@ -324,7 +324,7 @@ fun PlayerScreen(
                     ) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = null)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Buat Playlist Baru")
+                        Text("Create New Playlist")
                     }
                 }
             },
@@ -338,7 +338,7 @@ fun PlayerScreen(
                         }
                     }
                 ) {
-                    Text("Batal")
+                    Text("Cancel")
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -429,13 +429,13 @@ fun PlayerScreen(
                         viewModel.toggleLikeCurrentTrack()
                         android.widget.Toast.makeText(
                             context,
-                            if (willLike) "Ditambahkan ke Lagu yang Disukai ❤️" else "Dihapus dari Lagu yang Disukai",
+                            if (willLike) "Added to Liked Songs ❤️" else "Removed from Liked Songs",
                             android.widget.Toast.LENGTH_SHORT
                         ).show()
                     }) {
                         Icon(
                             imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = if (isLiked) "Hapus dari Favorit" else "Sukai Lagu",
+                            contentDescription = if (isLiked) "Remove from Liked Songs" else "Like Track",
                             tint = if (isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(28.dp),
                         )
@@ -599,14 +599,14 @@ fun PlayerScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Up Next • Radio YouTube Music",
+                            text = "Up Next • Radio Queue",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                     Text(
-                        text = "${queue.size} lagu",
+                        text = if (queue.size == 1) "1 track" else "${queue.size} tracks",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -643,7 +643,7 @@ fun PlayerScreen(
                                 dragHandle = {
                                     Icon(
                                         imageVector = Icons.Default.DragHandle,
-                                        contentDescription = "Geser urutan lagu",
+                                        contentDescription = "Reorder track",
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier
                                             .size(38.dp)
@@ -655,7 +655,7 @@ fun PlayerScreen(
                                                         change.consume()
                                                         accumulatedY += dragAmount.y
                                                         if (accumulatedY > stepPx && idx < queue.size - 1) {
-                                                            viewModel.moveQueueItem(idx, idx + 1)
+                                                             viewModel.moveQueueItem(idx, idx + 1)
                                                             accumulatedY = 0f
                                                         } else if (accumulatedY < -stepPx && idx > 0) {
                                                             viewModel.moveQueueItem(idx, idx - 1)
@@ -688,7 +688,7 @@ fun PlayerScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Memuat rekomendasi lagu serupa...",
+                            text = "Loading similar track recommendations...",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -702,7 +702,7 @@ fun PlayerScreen(
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         Text(
-                            text = "Antrean berikutnya kosong",
+                            text = "Up next queue is empty",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -712,7 +712,7 @@ fun PlayerScreen(
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                             modifier = Modifier.height(32.dp)
                         ) {
-                            Text("Muat Lagu Serupa 📻", style = MaterialTheme.typography.labelSmall)
+                            Text("Load Similar Tracks 📻", style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }

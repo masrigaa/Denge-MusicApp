@@ -23,8 +23,8 @@ import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -123,12 +123,12 @@ fun TrackItem(
                                 onClick = {
                                     showPreviewDialog = false
                                     onPlayNext()
-                                    Toast.makeText(context, "${track.title} akan diputar berikutnya ⏭️", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "${track.title} will play next ⏭️", Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(10.dp),
                             ) {
-                                Text("Berikutnya", style = MaterialTheme.typography.labelMedium)
+                                Text("Play Next", style = MaterialTheme.typography.labelMedium)
                             }
                         }
                         if (onAddToQueue != null) {
@@ -136,12 +136,12 @@ fun TrackItem(
                                 onClick = {
                                     showPreviewDialog = false
                                     onAddToQueue()
-                                    Toast.makeText(context, "${track.title} ditambahkan ke antrean 📑", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "${track.title} added to queue 📑", Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(10.dp),
                             ) {
-                                Text("+ Antrean", style = MaterialTheme.typography.labelMedium)
+                                Text("+ Queue", style = MaterialTheme.typography.labelMedium)
                             }
                         }
                     }
@@ -165,12 +165,12 @@ fun TrackItem(
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Putar Lagu")
+                    Text("Play Track")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showPreviewDialog = false }) {
-                    Text("Tutup")
+                    Text("Close")
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -222,7 +222,7 @@ fun TrackItem(
                 overflow = TextOverflow.Ellipsis,
             )
             val subtitle = if (track.playCount > 0) {
-                "${track.artistName} • Diputar ${track.playCount}x bulan ini"
+                "${track.artistName} • Played ${track.playCount}x this month"
             } else {
                 track.artistName
             }
@@ -243,7 +243,7 @@ fun TrackItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Opsi Lagu",
+                    contentDescription = "Track options",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp),
                 )
@@ -255,7 +255,7 @@ fun TrackItem(
                 modifier = Modifier.background(MaterialTheme.colorScheme.surface),
             ) {
                 DropdownMenuItem(
-                    text = { Text("Putar Sekarang", fontWeight = FontWeight.Medium) },
+                    text = { Text("Play Now", fontWeight = FontWeight.Medium) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
@@ -272,7 +272,7 @@ fun TrackItem(
 
                 if (onPlayNext != null) {
                     DropdownMenuItem(
-                        text = { Text("Putar Berikutnya", fontWeight = FontWeight.Medium) },
+                        text = { Text("Play Next", fontWeight = FontWeight.Medium) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.SkipNext,
@@ -284,17 +284,17 @@ fun TrackItem(
                         onClick = {
                             showMenu = false
                             onPlayNext()
-                            Toast.makeText(context, "${track.title} akan diputar berikutnya ⏭️", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "${track.title} will play next ⏭️", Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
 
                 if (onAddToQueue != null) {
                     DropdownMenuItem(
-                        text = { Text("Tambah ke Antrean", fontWeight = FontWeight.Medium) },
+                        text = { Text("Add to Queue", fontWeight = FontWeight.Medium) },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Default.QueueMusic,
+                                imageVector = Icons.AutoMirrored.Filled.QueueMusic,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp),
@@ -303,7 +303,7 @@ fun TrackItem(
                         onClick = {
                             showMenu = false
                             onAddToQueue()
-                            Toast.makeText(context, "${track.title} ditambahkan ke antrean 📑", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "${track.title} added to queue 📑", Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
@@ -312,7 +312,7 @@ fun TrackItem(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = "Keluarkan dari Antrean",
+                                text = "Remove from Queue",
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.error,
                             )
@@ -328,14 +328,14 @@ fun TrackItem(
                         onClick = {
                             showMenu = false
                             onRemoveFromQueue()
-                            Toast.makeText(context, "${track.title} dikeluarkan dari antrean 🗑️", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "${track.title} removed from queue 🗑️", Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
 
                 if (onMoveUp != null) {
                     DropdownMenuItem(
-                        text = { Text("Pindahkan ke Atas", fontWeight = FontWeight.Medium) },
+                        text = { Text("Move Up", fontWeight = FontWeight.Medium) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.ArrowUpward,
@@ -353,7 +353,7 @@ fun TrackItem(
 
                 if (onMoveDown != null) {
                     DropdownMenuItem(
-                        text = { Text("Pindahkan ke Bawah", fontWeight = FontWeight.Medium) },
+                        text = { Text("Move Down", fontWeight = FontWeight.Medium) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.ArrowDownward,
@@ -370,7 +370,7 @@ fun TrackItem(
                 }
 
                 DropdownMenuItem(
-                    text = { Text("Lihat Preview HD", fontWeight = FontWeight.Medium) },
+                    text = { Text("View HD Artwork", fontWeight = FontWeight.Medium) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Image,

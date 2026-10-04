@@ -174,7 +174,7 @@ class MusicRepositoryImpl(
                 CachedPlaylistEntity(
                     playlistId = LIKED_SONGS_PLAYLIST_ID,
                     title = "Liked Songs",
-                    description = "Lagu-lagu yang Anda sukai",
+                    description = "Your favorite tracks",
                     thumbnailUrl = null,
                     trackCount = 0,
                     isLikedMusic = 1,

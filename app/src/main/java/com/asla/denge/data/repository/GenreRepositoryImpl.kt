@@ -20,18 +20,18 @@ class GenreRepositoryImpl(
         context.getSharedPreferences("hearmsc_genres_prefs", Context.MODE_PRIVATE)
 
     private val defaultGenres = listOf(
-        MusicGenre("g1", "Pop Indonesia", "Lagu pop Indonesia hits & viral", "pop indonesia hits terpopuler", "🌴", isSelected = false),
-        MusicGenre("g2", "Pop Barat & Global", "Tangga lagu internasional terpopuler", "billboard hot 100 pop hits", "🌍", isSelected = false),
-        MusicGenre("g3", "J-Pop Hits", "Melodi pop Jepang terpopuler", "jpop hits official", "🎌", isSelected = false),
-        MusicGenre("g4", "K-Pop Trending", "Hits idol Korea terpopuler", "kpop hits official", "⚡", isSelected = false),
-        MusicGenre("g5", "Rock & Alternatif", "Distorsi gitar energik & lagu rock", "rock hits popular songs", "🎸", isSelected = false),
-        MusicGenre("g6", "R&B & Soul", "Alunan vokal merdu dan ritme santai", "rnb soul popular hits", "🌙", isSelected = false),
-        MusicGenre("g7", "Akustik & Santai", "Petikan gitar akustik pengiring santai", "akustik santai indonesia", "☕", isSelected = false),
-        MusicGenre("g8", "Dangdut Koplo", "Irama dangdut koplo asik dan terpopuler", "dangdut koplo hits terpopuler", "💃", isSelected = false),
-        MusicGenre("g9", "EDM & Dance", "Dentuman beat elektro pengisi semangat", "edm electronic dance music", "🎧", isSelected = false),
-        MusicGenre("g10", "Jazz & Kafe", "Melodi jazz hangat suasana santai", "cozy jazz coffee", "🎷", isSelected = false),
-        MusicGenre("g11", "Anime OST", "Lagu tema & opening anime terpopuler", "anime opening hits official", "🌸", isSelected = false),
-        MusicGenre("g12", "Gaming Soundtracks", "Lagu tema dan soundtrack game epik", "gaming soundtracks ost", "🎮", isSelected = false),
+        MusicGenre("g1", "Indonesian Pop", "Viral and trending Indonesian pop hits", "pop indonesia hits terpopuler", "🌴", isSelected = false),
+        MusicGenre("g2", "Global Pop", "Top international charts and global hits", "billboard hot 100 pop hits", "🌍", isSelected = false),
+        MusicGenre("g3", "J-Pop Hits", "Popular Japanese pop melodies and charts", "jpop hits official", "🎌", isSelected = false),
+        MusicGenre("g4", "K-Pop Trending", "Trending Korean idol tracks and hits", "kpop hits official", "⚡", isSelected = false),
+        MusicGenre("g5", "Rock & Alternative", "Energetic guitars and classic rock anthems", "rock hits popular songs", "🎸", isSelected = false),
+        MusicGenre("g6", "R&B & Soul", "Smooth vocals and mellow grooves", "rnb soul popular hits", "🌙", isSelected = false),
+        MusicGenre("g7", "Acoustic & Chill", "Warm acoustic guitar and relaxing melodies", "acoustic chill relaxing songs", "☕", isSelected = false),
+        MusicGenre("g8", "Dangdut Koplo", "Upbeat and popular modern dangdut koplo", "dangdut koplo hits terpopuler", "💃", isSelected = false),
+        MusicGenre("g9", "EDM & Dance", "Electronic beats and high-energy anthems", "edm electronic dance music", "🎧", isSelected = false),
+        MusicGenre("g10", "Jazz & Cafe", "Warm jazz tones and cozy cafe vibes", "cozy jazz coffee", "🎷", isSelected = false),
+        MusicGenre("g11", "Anime OST", "Iconic anime openings and themes", "anime opening hits official", "🌸", isSelected = false),
+        MusicGenre("g12", "Gaming Soundtracks", "Epic video game soundtracks and themes", "gaming soundtracks ost", "🎮", isSelected = false),
     )
 
     private val _genresFlow = MutableStateFlow<List<MusicGenre>>(loadGenres())
