@@ -2,6 +2,8 @@
 
 <p align="center">
   <b>A lightweight, privacy-first, and completely ad-free music streaming client for Android.</b>
+  <br />
+  <sub><code>android</code> &nbsp;•&nbsp; <code>kotlin</code> &nbsp;•&nbsp; <code>jetpack-compose</code> &nbsp;•&nbsp; <code>music-player</code> &nbsp;•&nbsp; <code>innertube</code> &nbsp;•&nbsp; <code>ad-free</code></sub>
 </p>
 
 <p align="center">
@@ -106,6 +108,18 @@
 | **Izin Aplikasi** | Akses Internet, Notifikasi Media | Tanpa izin kontak/kamera |
 
 </div>
+
+---
+
+## 📚 Dokumentasi Proyek
+
+Dokumentasi teknis, panduan arsitektur, dan aturan kontribusi dapat dibaca di folder [`docs/`](docs/):
+
+- 🏛️ [Architecture.md](docs/Architecture.md) — Arsitektur sistem, aliran data, dan modul dependensi Koin.
+- 🎨 [Design.md](docs/Design.md) — Panduan desain UI/UX dan palet warna Warm Coffee "Brew & Bean".
+- 📋 [PRD.md](docs/PRD.md) — Product Requirements Document dan spesifikasi fitur aplikasi.
+- 📏 [Rules.md](docs/Rules.md) — Standar penulisan kode, konvensi, dan guardrails kontribusi.
+- 🗄️ [Schema.md](docs/Schema.md) — Skema database Room, entitas lokal, dan relasi data.
 
 ---
 
