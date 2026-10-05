@@ -36,7 +36,7 @@ class SearchViewModel(
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
-    // Riwayat pencarian terakhir (maksimal 5 item, sangat ringan via local SQLite)
+    // Recent search history (maximum 5 items, lightweight via local SQLite)
     val recentSearches: StateFlow<List<SearchHistoryEntity>> = searchHistoryDao.getRecent()
         .map { it.take(5) }
         .stateIn(

@@ -12,15 +12,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import com.asla.denge.player.PlayerManager
 import com.asla.denge.ui.navigation.AdsFreeNavHost
 import com.asla.denge.ui.theme.AdsFreeTheme
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
+
+    private val playerManager: PlayerManager by inject()
 
     private val requestNotificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ ->
             // Notification permission result handled
         }
+
+    override fun onStart() {
+        super.onStart()
+        playerManager.setAppInForeground(true)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        playerManager.setAppInForeground(false)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

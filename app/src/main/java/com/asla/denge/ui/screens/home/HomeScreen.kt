@@ -79,7 +79,7 @@ fun HomeScreen(
 
     val greeting = rememberGreeting()
 
-    // 1. Onboarding Dialogs (Hanya muncul pertama kali saat baru install)
+    // 1. Onboarding Dialogs (Only shown on first launch after installation)
     if (uiState.showOnboarding) {
         when (uiState.onboardingStep) {
             OnboardingStep.NAME_INPUT -> {
@@ -209,7 +209,7 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    // 1. Recently Played (1-3 lagu terakhir)
+                    // 1. Recently Played (1-3 most recent tracks)
                     if (history.isNotEmpty()) {
                         item {
                             Spacer(modifier = Modifier.height(4.dp))
@@ -255,7 +255,7 @@ fun HomeScreen(
                         }
                     }
 
-                    // 2. Sering Kamu Putar (Most Played)
+                    // 2. Your Top Plays (Most Played)
                     if (mostPlayed.isNotEmpty()) {
                         item {
                             Column(
@@ -339,7 +339,7 @@ fun HomeScreen(
                         }
                     }
 
-                    // 3. Because You Liked... (Rekomendasi Berdasarkan Lagu Favorit)
+                    // 3. Because You Liked... (Recommendations based on favorite track)
                     val recPair = recommendedFromLiked
                     if (recPair != null && recPair.second.isNotEmpty()) {
                         val (likedTrack, recTracks) = recPair
@@ -427,7 +427,7 @@ fun HomeScreen(
                         }
                     }
 
-                    // 4. Genre sections (pilihan pengguna)
+                    // 4. Genre sections (user-selected genres)
                     itemsIndexed(uiState.genreSections, key = { idx, section -> "${section.id}_$idx" }) { _, section ->
                         Column(
                             modifier = Modifier
@@ -566,7 +566,7 @@ private fun HomeWaveLoadingBox(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                // Garis atas (lebih tebal dan proporsional)
+                // Top accent line
                 Box(
                     modifier = Modifier
                         .width(96.dp)
@@ -577,7 +577,7 @@ private fun HomeWaveLoadingBox(
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Tulisan Déngé (lebih besar, mantap, dan tegas)
+                // Déngé logo title
                 Text(
                     text = "Déngé",
                     fontSize = 52.sp,
@@ -588,7 +588,7 @@ private fun HomeWaveLoadingBox(
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Garis bawah (lebih tebal dan proporsional)
+                // Bottom accent line
                 Box(
                     modifier = Modifier
                         .width(96.dp)
@@ -600,7 +600,7 @@ private fun HomeWaveLoadingBox(
 
             Spacer(modifier = Modifier.height(36.dp))
 
-            // Teks animasi gelombang per huruf "Please wait..." (lebih jelas & tebal)
+            // Wave animated text per letter "Please wait..."
             val text = "Please wait..."
             Row(
                 verticalAlignment = Alignment.CenterVertically,

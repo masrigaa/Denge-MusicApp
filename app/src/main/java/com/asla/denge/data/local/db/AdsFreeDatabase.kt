@@ -76,7 +76,7 @@ private class SeedCallback : RoomDatabase.Callback() {
             val now = System.currentTimeMillis()
             db.execSQL(
                 """INSERT OR IGNORE INTO cached_playlists (playlist_id, title, description, track_count, is_liked_music, is_editable, cached_at, synced_at)
-                   VALUES ('liked_songs', 'Liked Songs', 'Lagu-lagu yang Anda sukai', 0, 1, 0, $now, $now)"""
+                   VALUES ('liked_songs', 'Liked Songs', 'Your favorite tracks', 0, 1, 0, $now, $now)"""
             )
             val presets = listOf(
                 Triple("Flat", "[0,0,0,0,0]", now),
@@ -103,7 +103,7 @@ private class SeedCallback : RoomDatabase.Callback() {
             val now = System.currentTimeMillis()
             db.execSQL(
                 """INSERT OR IGNORE INTO cached_playlists (playlist_id, title, description, track_count, is_liked_music, is_editable, cached_at, synced_at)
-                   VALUES ('liked_songs', 'Liked Songs', 'Lagu-lagu yang Anda sukai', 0, 1, 0, $now, $now)"""
+                   VALUES ('liked_songs', 'Liked Songs', 'Your favorite tracks', 0, 1, 0, $now, $now)"""
             )
         } catch (_: Throwable) {
         }

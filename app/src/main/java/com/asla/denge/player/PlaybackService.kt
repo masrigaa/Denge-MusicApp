@@ -78,7 +78,7 @@ class PlaybackService : MediaSessionService() {
                 getString(R.string.notification_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Kontrol pemutaran musik dan status bar Hyper Island"
+                description = "Music playback controls and background media notification"
                 setShowBadge(false)
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 setSound(null, null)

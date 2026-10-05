@@ -60,6 +60,8 @@ data class PlayerState(
 class PlayerManager(
     private val context: Context,
     private val musicRepository: MusicRepository,
+    private val playbackCacheManager: PlaybackCacheManager,
+    private val settingsRepository: com.asla.denge.domain.repository.SettingsRepository,
 ) {
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
@@ -69,6 +71,9 @@ class PlayerManager(
         .setAllowCrossProtocolRedirects(true)
         .setKeepPostFor302Redirects(true)
         .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+    private val cachedDataSourceFactory =
+        playbackCacheManager.createCacheDataSourceFactory(httpDataSourceFactory)
 
     private val loadControl = DefaultLoadControl.Builder()
         .setBufferDurationsMs(
@@ -82,7 +87,7 @@ class PlayerManager(
         .build()
 
     val exoPlayer: ExoPlayer = ExoPlayer.Builder(context)
-        .setMediaSourceFactory(DefaultMediaSourceFactory(context).setDataSourceFactory(httpDataSourceFactory))
+        .setMediaSourceFactory(DefaultMediaSourceFactory(context).setDataSourceFactory(cachedDataSourceFactory))
         .setLoadControl(loadControl)
         .setAudioAttributes(
             AudioAttributes.Builder()
@@ -92,8 +97,18 @@ class PlayerManager(
             true // handleAudioFocus
         )
         .setHandleAudioBecomingNoisy(true)
-        .setWakeMode(C.WAKE_MODE_NETWORK)
-        .build()
+        .setWakeMode(C.WAKE_MODE_LOCAL)
+        .build().apply {
+            trackSelectionParameters = trackSelectionParameters.buildUpon()
+                .setAudioOffloadPreferences(
+                    androidx.media3.common.TrackSelectionParameters.AudioOffloadPreferences.Builder()
+                        .setAudioOffloadMode(androidx.media3.common.TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED)
+                        .setIsGaplessSupportRequired(false)
+                        .setIsSpeedChangeSupportRequired(false)
+                        .build()
+                )
+                .build()
+        }
 
     var onAudioSessionIdAvailable: ((Int) -> Unit)? = null
     private var progressJob: Job? = null
@@ -202,6 +217,13 @@ class PlayerManager(
                         refreshNotification()
                     }
                     Player.STATE_ENDED -> {
+                        if (stopAfterCurrentTrack) {
+                            stopAfterCurrentTrack = false
+                            _sleepTimerRemainingSeconds.value = null
+                            _activeSleepTimerOption.value = null
+                            exoPlayer.pause()
+                            return
+                        }
                         val duration = exoPlayer.duration
                         val pos = exoPlayer.currentPosition.coerceAtLeast(lastKnownPositionMs)
                         // If track unexpectedly ended with more than 15s remaining, it was a network drop, NOT real end!
@@ -341,9 +363,13 @@ class PlayerManager(
                 val artUrl = toHdThumbnailUrl(track.thumbnailUrl, track.videoId)
                     ?: getFallbackThumbnailUrl(track.videoId)
 
+                val preloaded = preloadedUrls.remove(track.videoId)
                 val (streamUrl, artBytes) = coroutineScope {
                     val streamDeferred = async(Dispatchers.IO) {
-                        musicRepository.getStreamUrl(track.videoId)
+                        preloaded ?: run {
+                            val quality = settingsRepository.getAudioQualitySync().id
+                            musicRepository.getStreamUrl(track.videoId, quality)
+                        }
                     }
                     val artDeferred = async(Dispatchers.IO) {
                         getOrFetchArtworkBytes(track.videoId, artUrl)
@@ -499,7 +525,7 @@ class PlayerManager(
             .toMutableMap()
 
         val result = mutableListOf<Track>()
-        // Maksimal 3 lagu per artis di seluruh antrean
+        // Maximum 3 tracks per artist across the entire queue
         for (cand in candidates) {
             if (cand.videoId in existingIds) continue
             val normArtist = normalizeArtist(cand.artistName)
@@ -798,18 +824,110 @@ class PlayerManager(
         _playerState.update { it.copy(repeatMode = nextMode) }
     }
 
+    private var isAppInForeground: Boolean = true
+    private val preloadedUrls = java.util.concurrent.ConcurrentHashMap<String, String>()
+    private var prefetchJob: Job? = null
+
+    private val _sleepTimerRemainingSeconds = MutableStateFlow<Long?>(null)
+    val sleepTimerRemainingSeconds: StateFlow<Long?> = _sleepTimerRemainingSeconds.asStateFlow()
+
+    private val _activeSleepTimerOption = MutableStateFlow<Int?>(null)
+    val activeSleepTimerOption: StateFlow<Int?> = _activeSleepTimerOption.asStateFlow()
+
+    private var sleepTimerJob: Job? = null
+    private var stopAfterCurrentTrack: Boolean = false
+
+    fun setAppInForeground(inForeground: Boolean) {
+        isAppInForeground = inForeground
+        if (inForeground && exoPlayer.isPlaying) {
+            _currentPositionMs.value = exoPlayer.currentPosition.coerceAtLeast(0L)
+        }
+    }
+
+    fun setSleepTimer(minutes: Int) {
+        cancelSleepTimer()
+        _activeSleepTimerOption.value = minutes
+        if (minutes == -1) {
+            stopAfterCurrentTrack = true
+            _sleepTimerRemainingSeconds.value = -1L
+            return
+        }
+        if (minutes <= 0) return
+
+        val totalSeconds = minutes * 60L
+        _sleepTimerRemainingSeconds.value = totalSeconds
+        sleepTimerJob = scope.launch {
+            var remaining = totalSeconds
+            while (isActive && remaining > 0) {
+                delay(1000L)
+                remaining--
+                _sleepTimerRemainingSeconds.value = remaining
+                if (remaining in 1..5) {
+                    val targetVol = (remaining / 5f).coerceIn(0.1f, 1f)
+                    exoPlayer.volume = targetVol
+                }
+            }
+            if (isActive) {
+                exoPlayer.pause()
+                exoPlayer.volume = 1f
+                _sleepTimerRemainingSeconds.value = null
+                _activeSleepTimerOption.value = null
+            }
+        }
+    }
+
+    fun cancelSleepTimer() {
+        sleepTimerJob?.cancel()
+        sleepTimerJob = null
+        stopAfterCurrentTrack = false
+        _sleepTimerRemainingSeconds.value = null
+        _activeSleepTimerOption.value = null
+        exoPlayer.volume = 1f
+    }
+
+    private fun maybePrefetchNextTrack(currentPos: Long, duration: Long) {
+        if (duration <= 0L) return
+        val remainingMs = duration - currentPos
+        val passedEightyPercent = duration > 0 && (currentPos.toFloat() / duration.toFloat()) > 0.8f
+        val shouldPrefetch = remainingMs in 1L..25_000L || passedEightyPercent
+        if (!shouldPrefetch || prefetchJob?.isActive == true) return
+
+        val state = _playerState.value
+        val nextIdx = state.currentIndex + 1
+        if (nextIdx in state.queue.indices) {
+            val nextTrack = state.queue[nextIdx]
+            if (!preloadedUrls.containsKey(nextTrack.videoId)) {
+                prefetchJob = scope.launch(Dispatchers.IO) {
+                    try {
+                        val quality = settingsRepository.getAudioQualitySync().id
+                        val url = musicRepository.getStreamUrl(nextTrack.videoId, quality)
+                        if (url.isNotBlank()) {
+                            preloadedUrls[nextTrack.videoId] = url
+                            val nextArt = toHdThumbnailUrl(nextTrack.thumbnailUrl, nextTrack.videoId)
+                                ?: getFallbackThumbnailUrl(nextTrack.videoId)
+                            getOrFetchArtworkBytes(nextTrack.videoId, nextArt)
+                        }
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+    }
+
     private fun startProgressTracker() {
         progressJob?.cancel()
         progressJob = scope.launch {
             while (isActive) {
                 if (exoPlayer.isPlaying) {
                     val pos = exoPlayer.currentPosition.coerceAtLeast(0L)
+                    val dur = exoPlayer.duration.coerceAtLeast(0L)
                     _currentPositionMs.value = pos
                     if (pos > 0L) {
                         lastKnownPositionMs = pos
                     }
+                    maybePrefetchNextTrack(pos, dur)
                 }
-                delay(300L)
+                val interval = if (isAppInForeground) 300L else 2500L
+                delay(interval)
             }
         }
     }
@@ -820,6 +938,9 @@ class PlayerManager(
     }
 
     fun release() {
+        cancelSleepTimer()
+        prefetchJob?.cancel()
+        preloadedUrls.clear()
         stopProgressTracker()
         loadJob?.cancel()
         relatedJob?.cancel()

@@ -42,11 +42,13 @@
 <br />
 
 <p align="center">
-  <img src="docs/screenshots/artwork_1.jpg" width="31%" alt="HD Artwork Preview 1" />
+  <img src="docs/screenshots/artwork_1.jpg" width="23%" alt="HD Artwork Preview 1" />
   &nbsp;
-  <img src="docs/screenshots/artwork_2.jpg" width="31%" alt="HD Artwork Preview 2" />
+  <img src="docs/screenshots/artwork_2.jpg" width="23%" alt="HD Artwork Preview 2" />
   &nbsp;
-  <img src="docs/screenshots/artwork_3.jpg" width="31%" alt="HD Artwork Preview 3" />
+  <img src="docs/screenshots/artwork_3.jpg" width="23%" alt="HD Artwork Preview 3" />
+  &nbsp;
+  <img src="docs/screenshots/artwork_4.jpg" width="23%" alt="HD Artwork Preview 4" />
 </p>
 <p align="center">
   <sub><i>High-Resolution Artwork Preview Modal & Quick Share Link Button</i></sub>

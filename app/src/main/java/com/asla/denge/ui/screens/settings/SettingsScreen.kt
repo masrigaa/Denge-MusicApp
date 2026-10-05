@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -57,10 +59,17 @@ fun SettingsScreen(
     val eqPresets by viewModel.eqPresets.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val availableGenres by viewModel.availableGenres.collectAsState()
+    val audioQuality by viewModel.audioQuality.collectAsState()
+    val usedCacheSize by viewModel.usedCacheSizeFormatted.collectAsState()
+    val sleepTimerRemaining by viewModel.sleepTimerRemainingSeconds.collectAsState()
+    val activeSleepTimerOption by viewModel.activeSleepTimerOption.collectAsState()
 
     var showEqDialog by remember { mutableStateOf(false) }
     var showEditNameDialog by remember { mutableStateOf(false) }
     var showGenreDialog by remember { mutableStateOf(false) }
+    var showQualityDialog by remember { mutableStateOf(false) }
+    var showSleepTimerDialog by remember { mutableStateOf(false) }
+    var showClearCacheDialog by remember { mutableStateOf(false) }
     var inputName by remember { mutableStateOf("") }
 
     val activePreset = eqPresets.firstOrNull { it.isActive == 1 }?.name ?: "Flat"
@@ -166,10 +175,13 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 100.dp),
         ) {
             // Profile Card (Google Account / Guest)
             Box(
@@ -241,7 +253,7 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 1. Box Pengaturan (Interaktif: Genre & Equalizer)
+            // 1. Music Settings Box (Genres, Equalizer, Audio Quality)
             Text(
                 text = "MUSIC SETTINGS",
                 style = MaterialTheme.typography.labelMedium,
@@ -271,12 +283,63 @@ fun SettingsScreen(
                         onClick = { showEqDialog = true },
                         isInteractive = true,
                     )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingsRow(
+                        title = "Audio Streaming Quality",
+                        value = if (audioQuality == com.asla.denge.domain.model.AudioQuality.HIGH) "High (160 kbps)" else "Data Saver (70 kbps)",
+                        onClick = { showQualityDialog = true },
+                        isInteractive = true,
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // 2. Box Informasi Aplikasi (Hanya Info: Tema, Kualitas, Versi)
+            // 2. Playback & Storage
+            Text(
+                text = "PLAYBACK & STORAGE",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+            ) {
+                Column {
+                    val sleepTimerText = when {
+                        sleepTimerRemaining == -1L -> "End of Track 🎵"
+                        sleepTimerRemaining != null && sleepTimerRemaining!! > 0L -> {
+                            val mins = sleepTimerRemaining!! / 60
+                            val secs = sleepTimerRemaining!! % 60
+                            String.format(java.util.Locale.US, "%02d:%02d ⏳", mins, secs)
+                        }
+                        else -> "Off"
+                    }
+                    SettingsRow(
+                        title = "Sleep Timer",
+                        value = sleepTimerText,
+                        onClick = { showSleepTimerDialog = true },
+                        isInteractive = true,
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingsRow(
+                        title = "Playback Disk Cache",
+                        value = "$usedCacheSize / 150 MB",
+                        onClick = { showClearCacheDialog = true },
+                        isInteractive = true,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // 3. Application Info Box
             Text(
                 text = "APPLICATION INFO",
                 style = MaterialTheme.typography.labelMedium,
@@ -301,8 +364,8 @@ fun SettingsScreen(
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     SettingsRow(
-                        title = stringResource(R.string.settings_audio_quality),
-                        value = "High (Opus 160kbps)",
+                        title = "Hardware Audio Offload",
+                        value = "Enabled (DSP) ⚡",
                         onClick = null,
                         isInteractive = false,
                     )
@@ -357,6 +420,202 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = { showEqDialog = false }) {
                     Text("Close", color = MaterialTheme.colorScheme.primary)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
+    }
+
+    if (showQualityDialog) {
+        AlertDialog(
+            onDismissRequest = { showQualityDialog = false },
+            title = {
+                Text(
+                    text = "Streaming Audio Quality",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    com.asla.denge.domain.model.AudioQuality.entries.forEach { quality ->
+                        val isSelected = quality == audioQuality
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                                    else androidx.compose.ui.graphics.Color.Transparent
+                                )
+                                .clickable {
+                                    viewModel.setAudioQuality(quality)
+                                    showQualityDialog = false
+                                }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = quality.displayName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = quality.subtitle,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showQualityDialog = false }) {
+                    Text("Close", color = MaterialTheme.colorScheme.primary)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
+    }
+
+    if (showSleepTimerDialog) {
+        val timerOptions = listOf(
+            Triple(15, "15 Minutes", "Stops playback after 15 minutes"),
+            Triple(30, "30 Minutes", "Stops playback after 30 minutes"),
+            Triple(45, "45 Minutes", "Stops playback after 45 minutes"),
+            Triple(60, "60 Minutes", "Stops playback after 1 hour"),
+            Triple(-1, "End of Track 🎵", "Stops when current song finishes"),
+        )
+        AlertDialog(
+            onDismissRequest = { showSleepTimerDialog = false },
+            title = {
+                Text(
+                    text = "Sleep Timer",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    timerOptions.forEach { (mins, title, subtitle) ->
+                        val isSelected = activeSleepTimerOption == mins
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                                    else androidx.compose.ui.graphics.Color.Transparent
+                                )
+                                .clickable {
+                                    viewModel.setSleepTimer(mins)
+                                    showSleepTimerDialog = false
+                                }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = subtitle,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                    }
+
+                    if (activeSleepTimerOption != null) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))
+                                .clickable {
+                                    viewModel.cancelSleepTimer()
+                                    showSleepTimerDialog = false
+                                }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Turn off timer",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSleepTimerDialog = false }) {
+                    Text("Close", color = MaterialTheme.colorScheme.primary)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
+    }
+
+    if (showClearCacheDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearCacheDialog = false },
+            title = {
+                Text(
+                    text = "Clear Playback Cache?",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
+            text = {
+                Text(
+                    text = "This will delete $usedCacheSize of locally cached audio chunks. Frequently played tracks will be re-buffered from YouTube when played.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.clearPlaybackCache()
+                        showClearCacheDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError,
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Text("Clear Cache")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearCacheDialog = false }) {
+                    Text("Cancel", color = MaterialTheme.colorScheme.primary)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,

@@ -77,6 +77,10 @@ val databaseModule = module {
         GenreRepositoryImpl(context = androidContext(), json = get())
     }
 
+    single<com.asla.denge.domain.repository.SettingsRepository> {
+        com.asla.denge.data.repository.SettingsRepositoryImpl(context = androidContext())
+    }
+
     single<MusicRepository> {
         MusicRepositoryImpl(
             innertubeClient = get(),
@@ -93,12 +97,30 @@ val databaseModule = module {
  * Player-related dependencies.
  */
 val playerModule = module {
-    single { PlayerManager(context = androidContext(), musicRepository = get()) }
+    single { com.asla.denge.player.PlaybackCacheManager(context = androidContext()) }
+    single {
+        PlayerManager(
+            context = androidContext(),
+            musicRepository = get(),
+            playbackCacheManager = get(),
+            settingsRepository = get(),
+        )
+    }
     single(createdAtStart = true) { AudioEffectsManager(playerManager = get(), eqPresetDao = get()) }
 
     viewModel { PlayerViewModel(playerManager = get(), musicRepository = get()) }
     viewModel { HomeViewModel(musicRepository = get(), playerManager = get(), authRepository = get(), genreRepository = get()) }
     viewModel { SearchViewModel(musicRepository = get(), playerManager = get(), searchHistoryDao = get()) }
     viewModel { LibraryViewModel(musicRepository = get(), playerManager = get()) }
-    viewModel { SettingsViewModel(authRepository = get(), audioEffectsManager = get(), musicRepository = get(), genreRepository = get()) }
+    viewModel {
+        SettingsViewModel(
+            authRepository = get(),
+            audioEffectsManager = get(),
+            musicRepository = get(),
+            genreRepository = get(),
+            settingsRepository = get(),
+            playbackCacheManager = get(),
+            playerManager = get(),
+        )
+    }
 }

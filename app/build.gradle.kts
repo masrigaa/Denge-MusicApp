@@ -14,8 +14,8 @@ android {
         applicationId = "com.asla.denge"
         minSdk = 31
         targetSdk = 36
-        versionCode = 147
-        versionName = "1.4.7"
+        versionCode = 156
+        versionName = "1.5.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -79,6 +79,8 @@ dependencies {
     val media3Version = "1.5.1"
     implementation("androidx.media3:media3-exoplayer:$media3Version")
     implementation("androidx.media3:media3-session:$media3Version")
+    implementation("androidx.media3:media3-datasource:$media3Version")
+    implementation("androidx.media3:media3-database:$media3Version")
     implementation("androidx.media3:media3-datasource-okhttp:$media3Version")
 
     // ── Networking (Ktor) ──
@@ -118,8 +120,6 @@ dependencies {
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0-rc01")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
-    // ── Splash Screen ──
-    implementation("androidx.core:core-splashscreen:1.0.1")
 
     // ── Testing ──
     testImplementation("junit:junit:4.13.2")

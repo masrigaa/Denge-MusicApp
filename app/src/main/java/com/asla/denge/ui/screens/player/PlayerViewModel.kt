@@ -126,4 +126,15 @@ class PlayerViewModel(
             musicRepository.addTrackToPlaylist(plId, current)
         }
     }
+
+    val sleepTimerRemainingSeconds: StateFlow<Long?> = playerManager.sleepTimerRemainingSeconds
+    val activeSleepTimerOption: StateFlow<Int?> = playerManager.activeSleepTimerOption
+
+    fun setSleepTimer(minutes: Int) {
+        playerManager.setSleepTimer(minutes)
+    }
+
+    fun cancelSleepTimer() {
+        playerManager.cancelSleepTimer()
+    }
 }

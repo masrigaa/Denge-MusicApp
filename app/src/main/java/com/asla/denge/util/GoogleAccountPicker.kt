@@ -10,7 +10,7 @@ object GoogleAccountPicker {
 
     /**
      * Create the official Android System Google Account Chooser intent.
-     * This opens the native Google Play Services bottom sheet ("Pilih akun untuk melanjutkan ke [App]").
+     * This opens the native Google Play Services bottom sheet ("Choose an account to continue to [App]").
      */
     fun createChooseAccountIntent(): Intent {
         val googleAccountTypes = arrayOf("com.google")

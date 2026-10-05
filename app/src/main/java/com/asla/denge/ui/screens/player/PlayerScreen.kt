@@ -26,8 +26,10 @@ import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -102,8 +104,12 @@ fun PlayerScreen(
     val queue = playerState.queue
     val currentIndex = playerState.currentIndex
 
+    val sleepTimerRemaining by viewModel.sleepTimerRemainingSeconds.collectAsState()
+    val activeSleepTimerOption by viewModel.activeSleepTimerOption.collectAsState()
+
     var showHdPreview by remember { mutableStateOf(false) }
     var showPlaylistDialog by remember { mutableStateOf(false) }
+    var showSleepTimerDialog by remember { mutableStateOf(false) }
     var newPlaylistName by remember { mutableStateOf("") }
     var isCreatingNewPlaylist by remember { mutableStateOf(false) }
 
@@ -161,7 +167,7 @@ fun PlayerScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // 1 Tombol Share: langsung salin tautan YouTube Music / YouTube ke clipboard
+                    // Share Button: copy track link directly to clipboard
                     Button(
                         onClick = {
                             val shareUrl = "https://music.youtube.com/watch?v=${track.videoId}"
@@ -345,6 +351,100 @@ fun PlayerScreen(
         )
     }
 
+    // Sleep Timer Dialog
+    if (showSleepTimerDialog) {
+        val timerOptions = listOf(
+            Triple(15, "15 Minutes", "Stops playback after 15 minutes"),
+            Triple(30, "30 Minutes", "Stops playback after 30 minutes"),
+            Triple(45, "45 Minutes", "Stops playback after 45 minutes"),
+            Triple(60, "60 Minutes", "Stops playback after 1 hour"),
+            Triple(-1, "End of Track 🎵", "Stops when current song finishes"),
+        )
+        AlertDialog(
+            onDismissRequest = { showSleepTimerDialog = false },
+            title = {
+                Text(
+                    text = "Sleep Timer",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    timerOptions.forEach { (mins, title, subtitle) ->
+                        val isSelected = activeSleepTimerOption == mins
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                                    else Color.Transparent
+                                )
+                                .clickable {
+                                    viewModel.setSleepTimer(mins)
+                                    showSleepTimerDialog = false
+                                }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = subtitle,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                    }
+
+                    if (activeSleepTimerOption != null) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))
+                                .clickable {
+                                    viewModel.cancelSleepTimer()
+                                    showSleepTimerDialog = false
+                                }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Turn off timer",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSleepTimerDialog = false }) {
+                    Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -375,8 +475,32 @@ fun PlayerScreen(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                // Spacer for symmetry
-                Spacer(modifier = Modifier.size(32.dp))
+                IconButton(onClick = { showSleepTimerDialog = true }) {
+                    val isTimerActive = sleepTimerRemaining != null
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Timer,
+                            contentDescription = "Sleep Timer",
+                            modifier = Modifier.size(24.dp),
+                            tint = if (isTimerActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        if (isTimerActive) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(16.dp)
+                                    .height(3.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(MaterialTheme.colorScheme.primary)
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.height(5.dp))
+                        }
+                    }
+                }
             }
         }
 
@@ -575,7 +699,7 @@ fun PlayerScreen(
             Spacer(modifier = Modifier.height(28.dp))
         }
 
-        // 6. UP NEXT / ANTREAN LAGU (Placed directly underneath the controls, just like YouTube Music)
+        // 6. UP NEXT / RADIO QUEUE (Placed directly underneath the controls, just like YouTube Music)
         item {
             Column(
                 modifier = Modifier

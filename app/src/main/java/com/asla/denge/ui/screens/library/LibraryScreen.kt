@@ -252,6 +252,12 @@ fun LibraryScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Playlists, liked tracks & history",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     Spacer(modifier = Modifier.height(14.dp))
                     TabRow(
                         selectedTabIndex = selectedTabIndex,

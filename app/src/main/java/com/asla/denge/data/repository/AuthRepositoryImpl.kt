@@ -60,7 +60,7 @@ class AuthRepositoryImpl(
 
         val updated = if (list.isEmpty() && !currentEmail.isNullOrBlank()) {
             val rawName = prefs.getString(KEY_USER_NAME, null)
-            val name = if (rawName.isNullOrBlank() || rawName.equals("Pengguna Google", ignoreCase = true) || rawName.equals("Akun Google Terhubung", ignoreCase = true)) {
+            val name = if (rawName.isNullOrBlank() || rawName.equals("Pengguna Google", ignoreCase = true) || rawName.equals("Google User", ignoreCase = true) || rawName.equals("Akun Google Terhubung", ignoreCase = true) || rawName.equals("Connected Google Account", ignoreCase = true)) {
                 com.asla.denge.util.GoogleAccountPicker.formatDisplayName(currentEmail)
             } else rawName
             val avatar = prefs.getString(KEY_USER_AVATAR, null)
@@ -78,7 +78,7 @@ class AuthRepositoryImpl(
             )
         } else {
             list.map {
-                val cleanDisplayName = if (it.displayName.isBlank() || it.displayName.equals("Pengguna Google", ignoreCase = true) || it.displayName.equals("Akun Google Terhubung", ignoreCase = true)) {
+                val cleanDisplayName = if (it.displayName.isBlank() || it.displayName.equals("Pengguna Google", ignoreCase = true) || it.displayName.equals("Google User", ignoreCase = true) || it.displayName.equals("Akun Google Terhubung", ignoreCase = true) || it.displayName.equals("Connected Google Account", ignoreCase = true)) {
                     com.asla.denge.util.GoogleAccountPicker.formatDisplayName(it.email)
                 } else it.displayName
                 it.copy(
@@ -143,24 +143,24 @@ class AuthRepositoryImpl(
     override suspend fun getUserName(): String? {
         val rawName = prefs.getString(KEY_USER_NAME, null)
         val email = prefs.getString(KEY_USER_EMAIL, null)
-        if (rawName.isNullOrBlank() || rawName.equals("Pengguna Google", ignoreCase = true) || rawName.equals("Akun Google Terhubung", ignoreCase = true)) {
+        if (rawName.isNullOrBlank() || rawName.equals("Pengguna Google", ignoreCase = true) || rawName.equals("Google User", ignoreCase = true) || rawName.equals("Akun Google Terhubung", ignoreCase = true) || rawName.equals("Connected Google Account", ignoreCase = true) || rawName.equals("Sobat Musik", ignoreCase = true)) {
             if (!email.isNullOrBlank()) {
                 val formatted = com.asla.denge.util.GoogleAccountPicker.formatDisplayName(email)
                 prefs.edit().putString(KEY_USER_NAME, formatted).apply()
                 return formatted
             }
-            return "Sobat Musik"
+            return "Music Lover"
         }
         return rawName
     }
 
     override fun hasCustomUserName(): Boolean {
         val name = prefs.getString(KEY_USER_NAME, null)
-        return !name.isNullOrBlank() && !name.equals("Pengguna Google", ignoreCase = true) && !name.equals("Akun Google Terhubung", ignoreCase = true)
+        return !name.isNullOrBlank() && !name.equals("Pengguna Google", ignoreCase = true) && !name.equals("Google User", ignoreCase = true) && !name.equals("Akun Google Terhubung", ignoreCase = true) && !name.equals("Connected Google Account", ignoreCase = true) && !name.equals("Sobat Musik", ignoreCase = true)
     }
 
     override suspend fun setUserName(name: String) {
-        val clean = name.trim().ifBlank { "Sobat Musik" }
+        val clean = name.trim().ifBlank { "Music Lover" }
         prefs.edit().putString(KEY_USER_NAME, clean).apply()
     }
 
@@ -173,7 +173,7 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun storeUser(email: String, name: String, avatar: String?, cookie: String?) {
-        val cleanName = if (name.isBlank() || name.equals("Pengguna Google", ignoreCase = true) || name.equals("Akun Google Terhubung", ignoreCase = true)) {
+        val cleanName = if (name.isBlank() || name.equals("Pengguna Google", ignoreCase = true) || name.equals("Google User", ignoreCase = true) || name.equals("Akun Google Terhubung", ignoreCase = true) || name.equals("Connected Google Account", ignoreCase = true)) {
             com.asla.denge.util.GoogleAccountPicker.formatDisplayName(email)
         } else {
             name.trim()

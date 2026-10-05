@@ -1,7 +1,14 @@
 <resources>
+    <!-- Warm Brew & Bean Coffee Canvas -->
+    <color name="coffee_canvas">#F7F2EB</color>
+
+    <!-- Main App Theme: launches directly without artificial splash screen -->
     <style name="Theme.AdsFreeMusic" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/coffee_canvas</item>
+        <item name="android:windowSplashScreenBackground">@color/coffee_canvas</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

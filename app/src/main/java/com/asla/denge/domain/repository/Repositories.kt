@@ -50,7 +50,7 @@ interface MusicRepository {
     suspend fun getTrack(videoId: String): Track?
 
     /** Resolve a streamable audio URL for a track (ad-free). */
-    suspend fun getStreamUrl(videoId: String): String
+    suspend fun getStreamUrl(videoId: String, quality: String = "high"): String
 
     /** Get artist details and top songs. */
     suspend fun getArtist(artistId: String): Pair<Artist, List<Track>>

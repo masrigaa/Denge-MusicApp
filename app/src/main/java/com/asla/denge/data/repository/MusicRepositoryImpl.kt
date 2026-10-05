@@ -192,7 +192,7 @@ class MusicRepositoryImpl(
         playlistDao.upsert(
             CachedPlaylistEntity(
                 playlistId = id,
-                title = title.ifBlank { "Playlist Baru" },
+                title = title.ifBlank { "New Playlist" },
                 description = description,
                 thumbnailUrl = null,
                 trackCount = 0,
@@ -230,9 +230,9 @@ class MusicRepositoryImpl(
         return cached?.toDomain()
     }
 
-    override suspend fun getStreamUrl(videoId: String): String {
+    override suspend fun getStreamUrl(videoId: String, quality: String): String {
         val cookie = authRepository.getAuthCookie()
-        return innertubeClient.getStreamUrl(videoId, cookie)
+        return innertubeClient.getStreamUrl(videoId, cookie, quality)
     }
 
     override suspend fun getArtist(artistId: String): Pair<Artist, List<Track>> {

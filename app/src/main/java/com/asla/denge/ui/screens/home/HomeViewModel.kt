@@ -155,7 +155,7 @@ class HomeViewModel(
                 _uiState.update { it.copy(isLoading = false, genreSections = sections) }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isLoading = false, error = e.localizedMessage ?: "Gagal memuat rekomendasi musik")
+                    it.copy(isLoading = false, error = e.localizedMessage ?: "Failed to load music recommendations")
                 }
             }
         }

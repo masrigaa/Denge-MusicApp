@@ -231,7 +231,7 @@ class InnertubeClient(
      * Resolve direct, unciphered stream URL for audio playback without ads.
      * Uses the VisionOS client context with visitor id which yields direct, ready-to-play audio URLs (m4a/Opus).
      */
-    suspend fun getStreamUrl(videoId: String, cookie: String? = null): String {
+    suspend fun getStreamUrl(videoId: String, cookie: String? = null, quality: String = "high"): String {
         val playerBody = buildJsonObject {
             put("videoId", videoId)
             put("context", buildVisionOsContext())
@@ -273,14 +273,28 @@ class InnertubeClient(
                         mimeType.startsWith("audio/")
                     }
 
-                // Lock & prioritize itag 251 (Opus ~160kbps High Quality), then fallback to itag 140 (AAC 128kbps) or highest bitrate
-                val directAudio = audioFormats.firstOrNull {
-                    it["url"] != null && it["itag"]?.jsonPrimitive?.intOrNull == 251
-                } ?: audioFormats.firstOrNull {
-                    it["url"] != null && it["itag"]?.jsonPrimitive?.intOrNull == 140
-                } ?: audioFormats
-                    .filter { it["url"] != null }
-                    .maxByOrNull { it["bitrate"]?.jsonPrimitive?.intOrNull ?: 0 }
+                // Select stream format based on quality preference
+                val directAudio = if (quality == "data_saver") {
+                    // Prioritize itag 250 (Opus ~70kbps), itag 249 (Opus ~50kbps), or itag 139 (AAC 48kbps)
+                    audioFormats.firstOrNull {
+                        it["url"] != null && it["itag"]?.jsonPrimitive?.intOrNull == 250
+                    } ?: audioFormats.firstOrNull {
+                        it["url"] != null && it["itag"]?.jsonPrimitive?.intOrNull == 249
+                    } ?: audioFormats.firstOrNull {
+                        it["url"] != null && it["itag"]?.jsonPrimitive?.intOrNull == 139
+                    } ?: audioFormats
+                        .filter { it["url"] != null }
+                        .minByOrNull { it["bitrate"]?.jsonPrimitive?.intOrNull ?: Int.MAX_VALUE }
+                } else {
+                    // Lock & prioritize itag 251 (Opus ~160kbps High Quality), then fallback to itag 140 (AAC 128kbps) or highest bitrate
+                    audioFormats.firstOrNull {
+                        it["url"] != null && it["itag"]?.jsonPrimitive?.intOrNull == 251
+                    } ?: audioFormats.firstOrNull {
+                        it["url"] != null && it["itag"]?.jsonPrimitive?.intOrNull == 140
+                    } ?: audioFormats
+                        .filter { it["url"] != null }
+                        .maxByOrNull { it["bitrate"]?.jsonPrimitive?.intOrNull ?: 0 }
+                }
 
                 val directUrl = directAudio?.get("url")?.jsonPrimitive?.contentOrNull
                 if (!directUrl.isNullOrBlank()) {

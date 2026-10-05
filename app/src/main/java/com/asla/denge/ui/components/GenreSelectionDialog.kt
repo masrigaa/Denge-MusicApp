@@ -192,7 +192,7 @@ fun GenreSelectionDialog(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 item {
-                    // Tombol Tambah Genre Kustom
+                    // Add Custom Genre button
                     Button(
                         onClick = { showAddCustomDialog = true },
                         modifier = Modifier.fillMaxWidth(),
