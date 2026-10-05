@@ -1,6 +1,6 @@
 # Design.md — Déngé UI/UX Design System
 
-## Tujuan
+## Purpose
 
 This document defines the **visual design system** and **screen-level UI/UX flows** for Déngé. It adapts the "Brew & Bean Coffee DNA" blueprint into a music-centric warm dark theme. Functional logic flows live in `PRD.md`; tech stack in `Architecture.md`.
 
@@ -23,7 +23,7 @@ graph TD
     E -->|Tap track / Menu| G
 
     E -->|Create playlist| K[New Playlist Dialog]
-    F -->|Ubah Nama| P[Edit Name Dialog]
+    F -->|Edit Name| P[Edit Name Dialog]
     F -->|Equalizer| N[EQ Preset Dialog]
 
     subgraph Bottom Nav
@@ -45,11 +45,11 @@ graph TD
 
 | Screen             | Route            | Bottom Nav Item | Description                              |
 |--------------------|------------------|-----------------|------------------------------------------|
-| Home               | `/home`          | Beranda 🏠      | Sapaan nama personal, baru saja diputar, 5 genre feeds |
-| Search             | `/search`        | Cari 🔍         | Pencarian lagu dengan opsi putar & antrean |
-| Library            | `/library`       | Pustaka 📚      | Playlist lokal, Liked Songs, Riwayat 10 lagu |
-| Settings           | `/settings`      | Pengaturan ⚙️   | Profil nama pengguna, Equalizer, info app |
-| Full Player        | `/player`        | — (overlay)     | Album art HD, seekbar, controls, Up Next radio |
+| Home               | `/home`          | Home 🏠         | Personalized greeting, recently played, 5 genre shelves |
+| Search             | `/search`        | Search 🔍       | Instant debounced search with playback & queue options |
+| Library            | `/library`       | Library 📚      | Custom playlists, Liked Songs, Listening history |
+| Settings           | `/settings`      | Settings ⚙️     | User profile, audio equalizer, theme & app info |
+| Full Player        | `/player`        | — (overlay)     | HD album art, scrub slider, controls, Up Next radio |
 
 ---
 

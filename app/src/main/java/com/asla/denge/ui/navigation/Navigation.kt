@@ -1,6 +1,9 @@
 package com.asla.denge.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -228,6 +231,10 @@ fun AdsFreeNavHost(
                 navController = navController,
                 startDestination = Routes.HOME,
                 modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
+                enterTransition = { fadeIn(animationSpec = tween(150, easing = LinearOutSlowInEasing)) },
+                exitTransition = { fadeOut(animationSpec = tween(150, easing = FastOutLinearInEasing)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(150, easing = LinearOutSlowInEasing)) },
+                popExitTransition = { fadeOut(animationSpec = tween(150, easing = FastOutLinearInEasing)) },
             ) {
                 composable(Routes.HOME) {
                     HomeScreen()

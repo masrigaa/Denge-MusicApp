@@ -1,93 +1,89 @@
 # PRD.md — Product Requirement Document (Déngé)
 
-## Tujuan
+## Purpose
 
-Dokumen ini mendefinisikan **apa** itu Déngé, **siapa** target penggunanya, dan **fitur apa saja** yang disediakan. Dokumen ini menjadi sumber kebenaran tingkat produk. Keputusan arsitektur teknis dijelaskan di `Architecture.md`; visual dan panduan desain di `Design.md`.
-
----
-
-## 1. Ringkasan Produk
-
-### 1.1 Visi
-**Déngé** adalah aplikasi pemutar musik Android native yang ringan, elegan, dan bebas iklan (100% ad-free). Déngé menghadirkan pengalaman mendengarkan musik YouTube Music berkualitas tinggi dengan visual bertema hangat *Brew & Bean Coffee*, pemutaran latar belakang (background playback), integrasi status bar modern, serta kontrol privasi penuh tanpa membutuhkan server maupun biaya langganan.
-
-### 1.2 Target Pengguna
-| Atribut         | Nilai                                        |
-|-----------------|----------------------------------------------|
-| Target Utama    | Pengguna personal / penikmat musik harian    |
-| Platform        | Android 12 hingga Android 16 (API 31 - 36)   |
-| Konteks         | Komuter, fokus kerja/belajar, santai         |
-| Motivasi Kunci  | Menikmati katalog musik luas tanpa jeda iklan, konsumsi RAM/baterai efisien |
-
-### 1.3 Tujuan & Metrik Keberhasilan
-- **M1 — Pemutaran Bebas Iklan**: 100% audio diputar tanpa gangguan iklan audio maupun jeda video.
-- **M2 — Efisiensi Memori & Baterai**: Konsumsi memori jauh lebih ringan daripada aplikasi browser atau webview wrapper.
-- **M3 — Pemutaran Latar Belakang & Dynamic Island**: Lagu tetap berjalan lancar saat layar mati atau aplikasi diminimalkan, terintegrasi dengan status bar dan HyperOS Hyper Island.
-- **M4 — Pengalaman Pengguna Premium**: Visual hangat dengan tema Brew & Bean, transisi halus, dan kemudahan navigasi.
+This document defines **what** Déngé is, **who** its target users are, and **what features** it provides. It acts as the product-level single source of truth. Technical architecture decisions are detailed in `Architecture.md`; visual design principles and color tokens are outlined in `Design.md`.
 
 ---
 
-## 2. Fitur Utama (v1.3.2)
+## 1. Product Summary
 
-### 2.1 Beranda (Home Screen)
-- **Sapaan Personal**: Badge nama pengguna yang dapat dikustomisasi (misal: "Halo, Asla ☕").
-- **Lagu yang Sering Kamu Putar**: Menampilkan 2 lagu teratas yang paling sering didengarkan lengkap dengan penghitung jumlah pemutaran (*"Diputar X kali"*). Perhitungan ini otomatis di-reset setiap tanggal 1 setiap bulannya.
-- **Baru Saja Diputar**: Daftar horizontal riwayat lagu yang terakhir dimainkan untuk akses instan.
-- **Rekomendasi Genre Pilihan**: Beragam kurasi genre musik yang dapat disesuaikan bebas lewat Pengaturan sesuai selera pengguna.
+### 1.1 Vision
+**Déngé** is a native, lightweight, and completely ad-free Android music streaming client. Déngé delivers a premium listening experience powered by high-quality YouTube Music audio streams with a warm *Brew & Bean Coffee* theme, seamless background playback, modern status bar integration, and absolute privacy without requiring an account, server, or subscription.
 
-### 2.2 Now Playing (Pemutar Penuh)
-- **Album Art HD & Preview**: Menampilkan gambar cover resolusi tinggi. Mengetuk cover akan membuka dialog preview HD.
-- **Tombol Share Instan**: Tombol khusus di dialog preview yang langsung menyalin (copy) link YouTube / YouTube Music resmi ke clipboard untuk dibagikan dengan sekali sentuh.
-- **Kontrol Pemutaran Lengkap**: Play, Pause, Next, Previous, Shuffle, Repeat (Off, All, One), dan Slider progres interaktif.
-- **Antrean & Radio "Up Next"**: Menampilkan lagu berikutnya serta rekomendasi radio otomatis dari lagu yang sedang berjalan.
+### 1.2 Target Users
+| Attribute | Value |
+|:---|:---|
+| Primary Audience | Daily music lovers, students, and commuters |
+| Platform | Android 12 to Android 16 (API 31 - 36) |
+| Context | Commute, deep focus/study sessions, relaxation |
+| Key Motivations | Ad-free listening across a massive catalog, minimal RAM/battery impact |
 
-### 2.3 Pustaka (Library Screen)
-- **Lagu yang Disukai (Liked Songs)**: Penyimpanan lokal satu ketukan untuk menandai lagu favorit dengan ikon hati (♥).
-- **Playlist Kustom**: Kemampuan membuat dan mengelola playlist lokal tanpa batas.
-- **Riwayat Pemutaran**: Catatan kronologis pemutaran lengkap.
-
-### 2.4 Pencarian (Search Screen)
-- **Debounced Live Search**: Pencarian cepat ke katalog YouTube Music dengan jeda ketik otomatis.
-- **Menu Opsi Lagu (⋮)**: Opsi instan untuk "Putar Sekarang", "Putar Berikutnya", "Tambah ke Antrean", dan "Lihat Cover HD".
-
-### 2.5 Pengaturan (Settings Screen)
-- **Kartu Pengaturan Interaktif**:
-  - **Preferensi Genre**: Memilih genre musik favorit yang ditampilkan di Beranda.
-  - **Equalizer**: Penyesuaian audio effect dengan preset instan (Bass Boost, Vocal, Rock, Flat, dll.).
-- **Kartu Informasi & Personalisasi**:
-  - **Ubah Nama Panggilan**: Dialog kustomisasi nama lokal tanpa perlu login Google.
-  - **Tema & Warna**: Tema Brew & Bean Coffee (Dark Mocha & Latte).
-  - **Kualitas Audio**: High Quality Opus Audio Stream.
-  - **Versi Aplikasi**: Informasi rilis v1.3.2.
+### 1.3 Goals & Success Metrics
+- **M1 — 100% Ad-Free**: Pure audio streaming without video delays, banner popups, or audio ad interruptions.
+- **M2 — Efficiency**: Significantly lower memory and battery usage compared to browser tabs or webview wrappers.
+- **M3 — Background Playback & Island**: Reliable audio continuity when the screen turns off or while using other apps, integrated with media notifications and status bar islands.
+- **M4 — Premium UX**: Cozy Brew & Bean aesthetic, fluid animations, and intuitive navigation.
 
 ---
 
-## 3. Alur Pengguna (User Flows)
+## 2. Core Features
 
-### 3.1 Alur Mulai Pertama Kali (First Launch)
-1. Pengguna membuka Déngé untuk pertama kalinya.
-2. Aplikasi langsung siap memutar musik (tanpa splash screen panjang atau paksaan login akun).
-3. Nama awal diatur secara aman ("Sobat Musik"), pengguna dapat mengubahnya sewaktu-waktu di menu Pengaturan.
+### 2.1 Home Screen
+- **Personalized Greeting**: Dynamic time-of-day greeting with customizable user profile (e.g., "Hello, Asla ☕").
+- **Your Top Plays**: Prominently highlights your top 2 most frequently played tracks with a real-time play counter (*"Played X times this month"*), automatically resetting on the 1st of every month.
+- **Recently Played**: Horizontal carousel of recently played tracks for instant resumption.
+- **Curated Genres**: Customizable genre shelves on Home that users can adjust anytime via Settings.
 
-### 3.2 Alur Pemutaran & Pengaturan Antrean
-1. Pengguna mengetuk lagu dari Beranda, Pustaka, atau Pencarian.
-2. Jika memilih titik tiga (⋮):
-   - **Putar Berikutnya**: Menyisipkan lagu tepat setelah lagu yang sedang diputar.
-   - **Tambah ke Antrean**: Menambahkan lagu ke ujung antrean aktif.
-3. Notifikasi Foreground Service aktif dengan kontrol penuh di lockscreen dan Dynamic Island.
+### 2.2 Now Playing Screen
+- **HD Album Art & Preview**: Crisp album artwork with an interactive HD preview dialog on tap.
+- **Quick Share**: One-tap share button inside the artwork preview that instantly copies the official track link to the clipboard.
+- **Playback Controls**: Play, Pause, Next, Previous, Shuffle, Repeat (Off, All, One), and an accurate scrub slider.
+- **Up Next & Radio Queue**: Full queue management with drag-to-reorder and automated radio recommendations based on current listening.
 
-### 3.3 Alur Berbagi Musik (Share)
-1. Di layar Now Playing, pengguna mengetuk cover album untuk membuka dialog preview.
-2. Pengguna mengetuk tombol **Share**.
-3. Link YouTube Music resmi otomatis tersalin ke clipboard dan toast konfirmasi muncul. Pengguna tinggal menempelkan (*paste*) link tersebut di WhatsApp, Discord, atau media sosial lainnya.
+### 2.3 Library Screen
+- **Liked Songs**: One-tap local bookmarking with the heart (♥) button.
+- **Custom Playlists**: Create, name, edit, and delete local playlists seamlessly.
+- **Listening History**: Chronological playback history log.
+
+### 2.4 Search Screen
+- **Debounced Live Search**: Rapid, responsive search across YouTube Music with instant track results.
+- **Track Options Menu (⋮)**: Instant actions for "Play Now", "Play Next", "Add to Queue", and "View HD Artwork".
+
+### 2.5 Settings Screen
+- **Interactive Preferences**:
+  - **Manage Home Genres**: Select up to 5 favorite music genres or add custom search keywords.
+  - **Equalizer Presets**: Sound adjustments with instant presets (Bass Boost, Vocal, Rock, Flat, etc.).
+- **Profile & Customization**:
+  - **Edit Profile Name**: Local display name dialog with zero Google login requirement.
+  - **Theme Info**: Brew & Bean Coffee style aesthetic.
+  - **Audio Quality**: High Quality Opus Audio Stream indicator.
+  - **App Version**: Current release info.
 
 ---
 
-## 4. Keamanan & Kepatuhan
-- **Zero Server Footprint**: Tidak menyimpan data di cloud server Déngé.
-- **Privacy First**: Tidak mengambil kontak, lokasi, atau file pribadi pengguna.
-- **Educational / Fair-Use**: Dibuat sebagai pemutar media alternatif berbasis open API client.
+## 3. User Flows
+
+### 3.1 First Launch Flow
+1. User launches Déngé.
+2. The app is immediately ready to play music (no splash screen delays or login walls).
+3. The default profile name is safely initialized ("Music Lover"), customizable anytime in Settings.
+
+### 3.2 Playback & Queue Management Flow
+1. User taps a track from Home, Library, or Search.
+2. If selecting the three-dots menu (⋮):
+   - **Play Next**: Inserts the track right after the current song.
+   - **Add to Queue**: Appends the track to the end of the active queue.
+3. Media Foreground Service activates with lock screen controls and system notification support.
+
+### 3.3 Share Track Flow
+1. On the Now Playing screen, user taps the album cover to open HD Preview.
+2. User taps **Share**.
+3. The official track link is copied to the clipboard with a confirmation toast, ready to paste into chat or social apps.
 
 ---
 
-*Terakhir diperbarui: 27 September 2026 — Déngé v1.3.2*
+## 4. Security & Compliance
+- **Zero Server Footprint**: No user data is stored on remote servers.
+- **Privacy-First**: No access requested to contacts, camera, or personal files.
+- **Fair-Use & Educational**: Built as an alternative media client utilizing public client endpoints.

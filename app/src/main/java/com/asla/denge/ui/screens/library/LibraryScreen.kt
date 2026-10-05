@@ -271,8 +271,8 @@ fun LibraryScreen(
                                 text = {
                                     Text(
                                         text = title,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.SemiBold,
                                         color = if (selectedTabIndex == index) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -328,7 +328,7 @@ fun LibraryScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 item {
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(10.dp))
                                     Row(
                                         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -336,8 +336,8 @@ fun LibraryScreen(
                                     ) {
                                         Text(
                                             text = if (likedSongs.size == 1) "1 Liked Song" else "${likedSongs.size} Liked Songs",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.SemiBold,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary,
                                         )
                                         Button(
@@ -357,7 +357,7 @@ fun LibraryScreen(
                                             Text("Play All")
                                         }
                                     }
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(2.dp))
                                 }
                                 itemsIndexed(likedSongs, key = { idx, item -> "liked_${item.videoId}_$idx" }) { _, track ->
                                     TrackItem(
@@ -385,7 +385,7 @@ fun LibraryScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 item {
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(10.dp))
                                     Row(
                                         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -393,8 +393,8 @@ fun LibraryScreen(
                                     ) {
                                         Text(
                                             text = if (history.size == 1) "1 Recently Played Song" else "${history.size} Recently Played Songs",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.SemiBold,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary,
                                         )
                                         Button(
@@ -414,7 +414,7 @@ fun LibraryScreen(
                                             Text("Play All")
                                         }
                                     }
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(2.dp))
                                 }
                                 itemsIndexed(history, key = { idx, item -> "lib_hist_${item.videoId}_$idx" }) { _, track ->
                                     TrackItem(

@@ -1,6 +1,6 @@
 # Rules.md — Déngé Development Guidelines
 
-## Tujuan
+## Purpose
 
 This document defines the **coding standards, workflows, and guardrails** for the Déngé project. All contributors — human or AI — must follow these rules. Consistency is non-negotiable.
 

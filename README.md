@@ -31,12 +31,12 @@
 ## 📸 Screenshots Showcase
 
 <p align="center">
-  <img src="docs/screenshots/home_screen.jpg" width="46%" alt="Beranda Pribadi" />
+  <img src="docs/screenshots/home_screen.jpg" width="46%" alt="Personalized Home" />
   &nbsp;&nbsp;
-  <img src="docs/screenshots/now_playing.jpg" width="46%" alt="Layar Now Playing" />
+  <img src="docs/screenshots/now_playing.jpg" width="46%" alt="Now Playing Screen" />
 </p>
 <p align="center">
-  <sub><i>Beranda Pribadi & Rekomendasi &nbsp;•&nbsp; Layar Pemutar Musik & Antrean Radio</i></sub>
+  <sub><i>Personalized Home & Recommendations &nbsp;•&nbsp; Now Playing Screen & Radio Queue</i></sub>
 </p>
 
 <br />
@@ -49,88 +49,88 @@
   <img src="docs/screenshots/artwork_3.jpg" width="31%" alt="HD Artwork Preview 3" />
 </p>
 <p align="center">
-  <sub><i>Modal Preview Cover Resolusi Tinggi & Tombol Cepat Salin Link (Share)</i></sub>
+  <sub><i>High-Resolution Artwork Preview Modal & Quick Share Link Button</i></sub>
 </p>
 
 ---
 
-## 🌟 Fitur Unggulan
+## 🌟 Key Features
 
-- **🚫 100% Bebas Iklan (Ad-Free)**  
-  Streaming audio berkecepatan tinggi tanpa interupsi iklan suara maupun jeda video sponsor.
+- **🚫 100% Ad-Free Streaming**  
+  High-speed audio streaming with zero audio ads, sponsored interruptions, or video pauses.
 
-- **🎧 Pemutaran Latar Belakang (True Background Playback)**  
-  Musik tetap berjalan stabil saat layar mati atau saat membuka aplikasi lain. Terintegrasi penuh dengan notifikasi sistem, lockscreen controls, dan status bar dinamis (*Dynamic Island*).
+- **🎧 True Background Playback**  
+  Playback stays smooth and uninterrupted with the screen locked or while multitasking across other apps. Fully integrated with system media notifications, lock screen controls, and dynamic status bars.
 
-- **☕ Tema Hangat "Brew & Bean"**  
-  Tampilan estetik berpalet warna kopi (Espresso, Warm Mocha, Hazelnut, Creamy Latte) yang nyaman di mata dengan desain layar penuh *Edge-to-Edge*.
+- **☕ Warm "Brew & Bean" Theme**  
+  An aesthetic coffee palette (Espresso, Warm Mocha, Hazelnut, and Creamy Latte) with an immersive edge-to-edge layout that is easy on the eyes.
 
-- **🔒 Privasi Utuh & Tanpa Akun (Zero-Backend)**  
-  Aplikasi berjalan murni di perangkat kamu. Tidak perlu login akun Google, tanpa database server perantara, dan bebas dari pelacakan privasi. Kamu bisa mengganti nama panggilan profilmu kapan saja.
+- **🔒 Zero-Backend & Complete Privacy**  
+  Runs entirely on your device. No Google account login required, no intermediary servers or tracking databases. Customize your listener profile name locally anytime.
 
-- **📊 Pustaka Pintar & Reset Bulanan**  
-  - **Yang Sering Kamu Putar**: Menampilkan 2 lagu teratas yang paling sering didengarkan lengkap dengan penghitung putaran real-time yang otomatis di-reset setiap tanggal 1 setiap bulannya.
-  - **Liked Songs (♥)** & Playlist kustom tersimpan langsung di memori HP kamu.
-  - Riwayat pemutaran dan riwayat pencarian cepat.
+- **📊 Smart Library & Monthly Reset Counter**  
+  - **Your Top Plays**: Displays your top 2 most frequently played tracks with a real-time play counter that automatically resets on the 1st of each month.
+  - **Liked Songs (♥)** & Custom Playlists stored safely on your local device.
+  - Search history with instant recall and playback history.
 
 - **🔗 HD Artwork Preview & Quick Share**  
-  Ketuk gambar cover lagu di layar Now Playing untuk melihat artwork dalam resolusi tinggi, dan gunakan tombol **Share** untuk langsung menyalin link lagu resmi ke clipboard dalam satu ketukan.
+  Tap the album art in the Now Playing screen to inspect HD cover artwork, and tap **Share** to copy the track link directly to your clipboard in a single tap.
 
-- **🎚️ Audio Equalizer & Kurasi Genre**  
-  Equalizer audio bawaan dengan beragam preset (Bass Boost, Vocal, Rock, Flat) serta kurasi genre lagu di Beranda yang dapat kamu atur sesuai selera mendengarmu.
-
----
-
-## 📱 Panduan Pemasangan Cepat
-
-1. **Unduh File APK:**  
-   👉 **[Download `Denge.apk` Versi Terbaru](https://github.com/masrigaa/Denge-MusicApp/releases/latest/download/Denge.apk)**
-2. **Pasang di HP:**  
-   Buka file `.apk` yang selesai diunduh. Jika muncul notifikasi keamanan instalasi dari luar browser, pilih **"Izinkan penginstalan dari sumber ini"** (*Allow from this source*).
-3. **Mulai Mendengarkan:**  
-   Buka **Déngé**, cari lagu favoritmu, dan nikmati musik tanpa batas!
-
-> 💡 **Tips Agar Musik Tidak Terputus di Background:**  
-> Pada beberapa tipe HP Android, sistem operasi cenderung membatasi jaringan saat layar mati. Agar pemutaran musik tetap lancar, buka **Info Aplikasi Déngé > Penghemat Baterai**, lalu ubah ke **"Tidak ada pembatasan (No restrictions / Unrestricted)"**.
+- **🎚️ Audio Equalizer & Custom Genre Curation**  
+  Built-in audio equalizer with versatile presets (Bass Boost, Vocal, Rock, Flat) alongside customizable Home genre tabs tailored to your taste.
 
 ---
 
-## ⚙️ Persyaratan Sistem
+## 📱 Quick Installation Guide
+
+1. **Download APK:**  
+   👉 **[Download Latest `Denge.apk`](https://github.com/masrigaa/Denge-MusicApp/releases/latest/download/Denge.apk)**
+2. **Install on Device:**  
+   Open the downloaded `.apk` file. If prompted with an unknown sources prompt, select **"Allow from this source"**.
+3. **Start Listening:**  
+   Launch **Déngé**, pick your favorite genres or tracks, and enjoy unlimited music!
+
+> 💡 **Background Playback Optimization Tip:**  
+> On select Android devices, aggressive battery management may restrict background network activity. For seamless background playback, navigate to **Déngé App Info > Battery Usage**, and select **"Unrestricted"**.
+
+---
+
+## ⚙️ System Requirements
 
 <div align="center">
 
-| Spesifikasi | Kebutuhan Minimum | Rekomendasi |
+| Specification | Minimum | Recommended |
 |:---|:---:|:---:|
-| **Sistem Operasi** | Android 12 (API 31) | Android 13, 14, 15+ |
-| **Ukuran Aplikasi** | ~35 MB | ~35 MB |
-| **RAM** | 2 GB | 3 GB atau lebih |
-| **Koneksi** | Wi-Fi / Data Seluler (3G/4G/5G) | Koneksi stabil |
-| **Izin Aplikasi** | Akses Internet, Notifikasi Media | Tanpa izin kontak/kamera |
+| **Operating System** | Android 12 (API 31) | Android 13, 14, 15+ |
+| **App Size** | ~35 MB | ~35 MB |
+| **RAM** | 2 GB | 3 GB or more |
+| **Network** | Wi-Fi / Cellular (3G/4G/5G) | Stable connection |
+| **Permissions** | Internet, Media Notification | No contacts/camera needed |
 
 </div>
 
 ---
 
-## 📚 Dokumentasi Proyek
+## 📚 Project Documentation
 
-Dokumentasi teknis, panduan arsitektur, dan aturan kontribusi dapat dibaca di folder [`docs/`](docs/):
+Explore technical architecture, design guidelines, and contribution rules in the [`docs/`](docs/) directory:
 
-- 🏛️ [Architecture.md](docs/Architecture.md) — Arsitektur sistem, aliran data, dan modul dependensi Koin.
-- 🎨 [Design.md](docs/Design.md) — Panduan desain UI/UX dan palet warna Warm Coffee "Brew & Bean".
-- 📋 [PRD.md](docs/PRD.md) — Product Requirements Document dan spesifikasi fitur aplikasi.
-- 📏 [Rules.md](docs/Rules.md) — Standar penulisan kode, konvensi, dan guardrails kontribusi.
-- 🗄️ [Schema.md](docs/Schema.md) — Skema database Room, entitas lokal, dan relasi data.
+- 🏛️ [Architecture.md](docs/Architecture.md) — System architecture, data flow, and Koin dependency modules.
+- 🎨 [Design.md](docs/Design.md) — UI/UX design guide and Warm Coffee "Brew & Bean" color tokens.
+- 📋 [PRD.md](docs/PRD.md) — Product Requirements Document and feature specifications.
+- 📏 [Rules.md](docs/Rules.md) — Code style guidelines, conventions, and contribution guardrails.
+- 🗄️ [Schema.md](docs/Schema.md) — Room database schema, local entities, and data relations.
 
 ---
 
 ## ⚖️ Disclaimer
 
-- **Tujuan Edukasi**: Déngé adalah proyek pemutar media open-source yang dikembangkan untuk tujuan riset dan pembelajaran.
-- **Merek Dagang**: YouTube dan YouTube Music adalah merek dagang terdaftar milik Google LLC. Proyek ini tidak berafiliasi dengan, disponsori, atau didukung oleh Google LLC.
-- **Fair Use**: Aplikasi ini tidak meng-host atau mendistribusikan file audio berhak cipta; seluruh aliran audio diakses langsung dari endpoint publik oleh perangkat pengguna.
+- **Educational Purpose**: Déngé is an open-source media player developed strictly for educational, research, and personal use.
+- **Trademarks**: YouTube and YouTube Music are registered trademarks of Google LLC. This project is not affiliated with, sponsored by, or endorsed by Google LLC.
+- **Fair Use**: This application does not host or distribute copyrighted audio files; all streams are resolved directly from public endpoints by the client device.
 
 ---
 
 <p align="center">
-  Dibuat dengan ☕ oleh <b>Asla</b>
+  Crafted with ☕ by <b>Asla</b>
 </p>

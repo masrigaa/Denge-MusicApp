@@ -1,6 +1,6 @@
 # Schema.md — Déngé Database Schema
  
-## Tujuan
+## Purpose
  
 This document defines the **local database schema** (Room / SQLite) for Déngé. The app has no backend — all persistent data lives on-device. This schema covers cached music metadata, user preferences, playback history, and local queue state.
 

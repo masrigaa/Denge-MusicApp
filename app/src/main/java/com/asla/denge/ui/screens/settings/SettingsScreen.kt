@@ -241,8 +241,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(18.dp))
-
             // 1. Box Pengaturan (Interaktif: Genre & Equalizer)
             Text(
                 text = "MUSIC SETTINGS",

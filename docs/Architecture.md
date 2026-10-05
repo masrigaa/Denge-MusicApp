@@ -1,42 +1,42 @@
 # Architecture.md — Déngé Architecture Guide
 
-## Tujuan
+## Purpose
 
-Dokumen ini mendefinisikan **bagaimana** aplikasi Déngé dibangun — arsitektur teknis, struktur proyek, dependensi, alur data, serta keputusan arsitektur (ADR). Dokumen ini menjadi sumber kebenaran teknis (single source of truth) untuk seluruh implementasi kode. Kebutuhan produk dijelaskan di `PRD.md`; desain visual di `Design.md`.
+This document defines **how** the Déngé application is built — technical architecture, project directory structure, dependencies, data flow, and architectural decision records (ADR). It serves as the technical single source of truth for all code implementations. Product requirements are outlined in `PRD.md`; visual and UX guidelines in `Design.md`.
 
 ---
 
 ## 1. High-Level Overview
 
-**Déngé** (`com.asla.denge`) adalah aplikasi pemutar musik Android native yang dibangun 100% menggunakan **Kotlin** dan **Jetpack Compose**. Aplikasi ini berkomunikasi langsung dengan YouTube Music Innertube API untuk mencari metadata lagu, album, artis, serta menyelesaikan streaming audio berformat Opus (ad-free) berkualitas tinggi.
+**Déngé** (`com.asla.denge`) is a native Android music player app built 100% in **Kotlin** and **Jetpack Compose**. It communicates directly with YouTube Music's Innertube API to query track metadata, albums, and artists, resolving high-quality, ad-free Opus audio streams.
 
-Déngé dirancang dengan filosofi **Privacy-First & Zero-Backend**:
-- **Client-Side Only**: Tidak ada server perantara (backend), database cloud, atau biaya hosting. Seluruh pemrosesan dan permintaan stream berjalan langsung dari perangkat pengguna ke Innertube.
-- **Local Profile**: Personalisasi nama pengguna dikelola langsung secara lokal menggunakan `EncryptedSharedPreferences` tanpa mewajibkan Google login yang rumit.
-- **Background Playback**: Menggunakan **AndroidX Media3 (ExoPlayer)** di dalam Foreground Service bertipe `mediaPlayback`, terintegrasi dengan **MediaSession** Android serta status bar / Dynamic Island (Xiaomi HyperOS Hyper Island).
-- **Offline Storage**: Seluruh lagu yang disukai (Liked Songs), riwayat pemutaran, lagu yang sering diputar (dengan reset bulanan), dan playlist custom disimpan lokal di SQLite melalui **Room Database**.
+Déngé is architected with a **Privacy-First & Zero-Backend** philosophy:
+- **Client-Side Only**: No intermediary backend servers, cloud databases, or subscription fees. All network requests and stream resolution run directly from the client device to Innertube endpoints.
+- **Local Profile**: Personalized user display names are managed entirely on-device via `EncryptedSharedPreferences`, without requiring complex Google account logins.
+- **Background Playback**: Powered by **AndroidX Media3 (ExoPlayer)** hosted inside a `mediaPlayback` Foreground Service, fully integrated with Android's system **MediaSession**, lock screen media controls, and status bar islands (such as Xiaomi HyperOS Hyper Island).
+- **Offline Storage**: All Liked Songs, playback history, top played tracks (with monthly reset counters), and custom playlists are stored locally in SQLite via **Room Database**.
 
 ---
 
 ## 2. Tech Stack
 
-| Layer              | Technology                          | Version     | Rationale                                        |
-|--------------------|-------------------------------------|-------------|--------------------------------------------------|
-| Language           | Kotlin                              | 2.0+        | Modern, aman dari null, performa native Android   |
-| UI Framework       | Jetpack Compose                     | 1.7+        | Deklaratif, reactive, Material 3                 |
-| Design System      | Brew & Bean Coffee Theme            | M3 1.3+     | Palet warm mocha/latte/cream, rounded surfaces   |
-| Min SDK            | Android 12 (API 31)                 | —           | Mendukung MediaSession modern & Dynamic Island   |
-| Target / Compile   | Android 16 (API 36)                 | —           | Kompatibilitas versi Android terbaru             |
-| Audio Player       | AndroidX Media3 (ExoPlayer)         | 1.5+        | Standar resmi Google untuk background audio      |
-| OS Integration     | Xiaomi HyperOS Hyper Island         | —           | Status bar Dynamic Island pill & lockscreen art  |
-| Networking         | Ktor Client (OkHttp engine)         | 3.0+        | Asynchronous, ringan, native coroutines          |
-| Serialization      | Kotlinx Serialization               | 1.7+        | JSON parsing berkecepatan tinggi & type-safe     |
-| Local Database     | Room (SQLite)                       | 2.7+ (KSP)  | ORM resmi Android dengan Flow & coroutine        |
-| Preferences        | EncryptedSharedPreferences          | 1.1+        | Penyimpanan profil nama pengguna & konfigurasi   |
-| DI                 | Koin                                | 4.0+        | Dependency Injection ringan tanpa code-gen       |
-| Navigation         | Jetpack Navigation Compose          | 2.8+        | Type-safe navigation                             |
-| Image Loading      | Coil 3                              | 3.0+        | Kotlin Multiplatform & Compose image loader      |
-| Build System       | Gradle (Kotlin DSL)                 | 8.7+        | Standar Android build tooling                    |
+| Layer | Technology | Version | Rationale |
+|:---|:---|:---:|:---|
+| Language | Kotlin | 2.0+ | Modern, null-safe, native Android performance |
+| UI Framework | Jetpack Compose | 1.7+ | Declarative, reactive, Material 3 design system |
+| Design System | Brew & Bean Coffee Theme | M3 1.3+ | Warm mocha/latte/cream palette with rounded surfaces |
+| Min SDK | Android 12 (API 31) | — | Supports modern MediaSession & Dynamic Island controls |
+| Target / Compile | Android 16 (API 36) | — | Maximum compatibility with modern Android versions |
+| Audio Player | AndroidX Media3 (ExoPlayer) | 1.5+ | Google's official standard for background audio |
+| OS Integration | Xiaomi HyperOS Hyper Island | — | Status bar dynamic island pill & lockscreen art |
+| Networking | Ktor Client (OkHttp engine) | 3.0+ | Asynchronous, lightweight, native coroutines |
+| Serialization | Kotlinx Serialization | 1.7+ | High-speed, type-safe JSON parsing |
+| Local Database | Room (SQLite) | 2.7+ (KSP) | Official Android ORM with Flow & coroutines |
+| Preferences | EncryptedSharedPreferences | 1.1+ | Secure local profile and configuration storage |
+| DI | Koin | 4.0+ | Lightweight dependency injection without code-gen overhead |
+| Navigation | Jetpack Navigation Compose | 2.8+ | Type-safe navigation framework |
+| Image Loading | Coil 3 | 3.0+ | Modern Kotlin Multiplatform & Compose image loader |
+| Build System | Gradle (Kotlin DSL) | 8.7+ | Standard Android build tooling |
 
 ---
 
@@ -48,25 +48,25 @@ AdsFreeMusic/
 │   ├── src/
 │   │   └── main/
 │   │       ├── java/com/asla/denge/
-│   │       │   ├── AdsFreeApp.kt                # Application class, inisialisasi Koin & CrashHandler
+│   │       │   ├── AdsFreeApp.kt                # Application class, Koin initialization & CrashHandler
 │   │       │   ├── MainActivity.kt              # Single Activity, Compose host, Edge-to-Edge
-│   │       │   ├── CrashActivity.kt             # Layar recovery saat fatal exception
+│   │       │   ├── CrashActivity.kt             # Crash recovery screen for uncaught fatal exceptions
 │   │       │   │
 │   │       │   ├── ui/                          # ── Presentation Layer ──
-│   │       │   │   ├── components/              # Komponen reusable
-│   │       │   │   │   ├── MiniPlayer.kt        # Player mengambang di bawah layar
-│   │       │   │   │   ├── TrackItem.kt         # Item baris lagu, menu (⋮), aksi antrean
-│   │       │   │   │   ├── TrackArtwork.kt      # Gambar album art rounded & placeholder
-│   │       │   │   │   ├── GenreSelectionDialog.kt # Modal ganti preferensi genre
-│   │       │   │   │   └── NameInputDialog.kt   # Dialog ubah nama panggilan
+│   │       │   │   ├── components/              # Reusable UI components
+│   │       │   │   │   ├── MiniPlayer.kt        # Persistent floating bottom player
+│   │       │   │   │   ├── TrackItem.kt         # Track list item, menu (⋮), queue actions
+│   │       │   │   │   ├── TrackArtwork.kt      # Rounded album artwork & fallback placeholder
+│   │       │   │   │   ├── GenreSelectionDialog.kt # Modal dialog for managing Home genres
+│   │       │   │   │   └── NameInputDialog.kt   # Dialog for updating listener profile name
 │   │       │   │   ├── navigation/              # NavHost, NavRoutes, BottomNavigationBar
 │   │       │   │   │   └── NavGraph.kt
-│   │       │   │   ├── screens/                 # Layar utama
-│   │       │   │   │   ├── home/                # Beranda, genre feeds, quick play
-│   │       │   │   │   ├── library/             # Pustaka, playlist lokal, riwayat, liked songs
+│   │       │   │   ├── screens/                 # Primary app screens
+│   │       │   │   │   ├── home/                # Home feed, genre shelves, quick play
+│   │       │   │   │   ├── library/             # Library, local playlists, history, liked songs
 │   │       │   │   │   ├── player/              # Full player, artwork preview, share, queue
-│   │       │   │   │   ├── search/              # Pencarian instan debounced
-│   │       │   │   │   └── settings/            # Pengaturan genre, EQ, tema, info app
+│   │       │   │   │   ├── search/              # Instant debounced search
+│   │       │   │   │   └── settings/            # Genre preferences, EQ, theme, app info
 │   │       │   │   └── theme/                   # Brew & Bean color palette, Type, Shape
 │   │       │   │
 │   │       │   ├── domain/                      # ── Domain Layer (Pure Kotlin) ──
@@ -75,7 +75,7 @@ AdsFreeMusic/
 │   │       │   │   └── usecase/                 # SearchMusicUseCase, GetStreamUrlUseCase
 │   │       │   │
 │   │       │   ├── data/                        # ── Data Layer ──
-│   │       │   │   ├── local/                   # Room Database, DAO, Entity
+│   │       │   │   ├── local/                   # Room Database, DAOs, Entities
 │   │       │   │   │   ├── db/MusicDatabase.kt
 │   │       │   │   │   ├── dao/                 # TrackDao, PlaylistDao, HistoryDao
 │   │       │   │   │   └── entity/              # CachedTrackEntity, PlaybackHistoryEntity, etc.
@@ -85,43 +85,43 @@ AdsFreeMusic/
 │   │       │   │
 │   │       │   ├── player/                      # ── Playback Layer ──
 │   │       │   │   ├── PlaybackService.kt       # MediaSessionService Foreground Service
-│   │       │   │   ├── PlayerManager.kt         # State manager pemutaran, antrean & ExoPlayer
-│   │       │   │   └── AudioEffectsManager.kt   # Kontrol Equalizer audio Android
+│   │       │   │   ├── PlayerManager.kt         # Playback state manager, queue & ExoPlayer
+│   │       │   │   └── AudioEffectsManager.kt   # Android audio equalizer controls
 │   │       │   │
 │   │       │   ├── di/                          # ── Dependency Injection ──
-│   │       │   │   └── Modules.kt               # Koin definitions (app, net, db, player, vm)
+│   │       │   │   └── Modules.kt               # Koin modules (app, net, db, player, vm)
 │   │       │   │
-│   │       │   └── util/                        # Helper fungsi, AccountPicker, Constants
+│   │       │   └── util/                        # Utility helpers, AccountPicker, Constants
 │   │       │
 │   │       ├── res/                             # Drawable icons, launcher icons, strings
-│   │       └── AndroidManifest.xml              # Izin audio, foreground service mediaPlayback
+│   │       └── AndroidManifest.xml              # Audio permissions, mediaPlayback foreground service
 │   │
-│   └── build.gradle.kts                         # Konfigurasi modul app
+│   └── build.gradle.kts                         # App module configuration
 │
-├── docs/                                        # Dokumentasi resmi
-│   ├── Architecture.md                          # Arsitektur teknis (file ini)
-│   ├── Design.md                                # Panduan UI/UX Brew & Bean
-│   ├── PRD.md                                   # Spesifikasi produk
-│   ├── Rules.md                                 # Standar kode & kontribusi
-│   └── Schema.md                                # Skema database lokal Room
+├── docs/                                        # Official project documentation
+│   ├── Architecture.md                          # Technical architecture (this file)
+│   ├── Design.md                                # Brew & Bean UI/UX guidelines
+│   ├── PRD.md                                   # Product requirements document
+│   ├── Rules.md                                 # Code style standards & guardrails
+│   └── Schema.md                                # Room SQLite database schema
 │
 ├── build.gradle.kts                             # Root build configuration
-├── settings.gradle.kts                          # Modul repositori Gradle
-├── gradle.properties                            # Alokasi memori JVM Gradle
-├── .gitignore                                   # Rule pengabaian file Git
-└── README.md                                    # GitHub Landing & panduan rilis
+├── settings.gradle.kts                          # Gradle repository & module settings
+├── gradle.properties                            # JVM memory allocation & flags
+├── .gitignore                                   # Git exclusion rules
+└── README.md                                    # GitHub landing page & release guide
 ```
 
 ---
 
-## 4. Alur Data (Data Flow)
+## 4. Data Flow
 
-### 4.1 Alur Pemutaran Audio (Playback Data Flow)
+### 4.1 Playback Data Flow
 
 ```
 ┌───────────┐      ┌──────────────┐      ┌─────────────────┐      ┌────────────────┐
-│ Pengguna  │─────▶│ Screen / UI  │─────▶│   ViewModel     │─────▶│ PlayerManager  │
-│ (Tap Lagu)│      │  (Compose)   │      │                 │      │                │
+│   User    │─────▶│ Screen / UI  │─────▶│   ViewModel     │─────▶│ PlayerManager  │
+│(Tap Track)│      │  (Compose)   │      │                 │      │                │
 └───────────┘      └──────────────┘      └─────────────────┘      └───────┬────────┘
                                                                           │
                                                                           ▼
@@ -131,57 +131,53 @@ AdsFreeMusic/
 └──────────────────┘      └───────────────┘      └─────────────────────────────────┘
 ```
 
-1. Pengguna memilih lagu di UI (atau opsi "Putar Berikutnya" / "Tambah ke Antrean").
-2. `PlayerManager` menerima request dan meminta resolusi stream URL ke `MusicRepository`.
-3. `InnertubeClient` mengekstrak direct playback stream audio tanpa segmen iklan.
-4. `PlaybackService` memulai Foreground Service dengan MediaSession aktif.
-5. Android System dan Xiaomi Hyper Island menerima notifikasi audio dan menampilkan kontrol di status bar serta lockscreen.
+1. The user taps a track in the UI (or triggers "Play Next" / "Add to Queue").
+2. `PlayerManager` receives the request and resolves the stream URL via `MusicRepository`.
+3. `InnertubeClient` extracts the clean direct Opus playback stream without ad segments.
+4. `PlaybackService` launches or updates the Foreground Service with an active MediaSession.
+5. The Android System and dynamic status bars receive media metadata and expose controls on the lock screen and notification shade.
 
-### 4.2 Alur Pencarian (Search Flow)
+### 4.2 Search Flow
 
 ```
-Pengguna mengetik query ──▶ Debounce (300ms) ──▶ InnertubeClient.search()
-                                                       │
-                                                       ▼
+User enters query ──▶ Debounce (300ms) ──▶ InnertubeClient.search()
+                                                   │
+                                                   ▼
 Compose UI ◀── StateFlow<SearchUiState> ◀── MusicRepository.search()
 ```
 
-### 4.3 Alur Profil & Nama Lokal
+### 4.3 Profile & Local Name Flow
 
-1. Nama pengguna disimpan langsung di `EncryptedSharedPreferences`.
-2. Pengguna dapat mengubah nama kapan saja melalui menu **Pengaturan ⚙️ -> Ubah Nama Panggilan**.
-3. Nama tersebut otomatis tampil di greeting Beranda ("Halo, [Nama Pengguna] ☕").
-4. Tidak diperlukan kredensial akun, username, maupun password.
+1. The listener's profile name is stored locally in `EncryptedSharedPreferences`.
+2. Users can change their name anytime via **Settings ⚙️ -> Edit Profile Name**.
+3. The display name immediately reflects across the Home greeting ("Good morning, [Name] ☕").
+4. No account credentials, passwords, or emails are ever requested.
 
 ---
 
-## 5. Keputusan Arsitektur (ADR)
+## 5. Architectural Decision Records (ADR)
 
-### ADR-001: Innertube API Langsung (Client-Side) Dibandingkan WebView
-- **Keputusan**: Berkomunikasi langsung via HTTP ke endpoint Innertube YouTube Music.
-- **Alasan**: Memberikan kontrol total atas pemilihan stream Opus berkualitas tinggi tanpa iklan, memungkinkan background playback sejati, dan konsumsi memori/baterai jauh lebih hemat daripada merender WebView.
+### ADR-001: Direct Innertube Client vs WebView
+- **Decision**: Connect directly over HTTP to YouTube Music Innertube API endpoints.
+- **Rationale**: Provides granular control over selecting high-bitrate, ad-free Opus audio streams, enables genuine background playback, and consumes far less RAM/battery than rendering a WebView.
 
 ### ADR-002: AndroidX Media3 Foreground Service
-- **Keputusan**: Menggunakan AndroidX Media3 (`PlaybackService`) dengan tipe `mediaPlayback`.
-- **Alasan**: Kompatibel penuh dengan spesifikasi Android 12+, tidak dimatikan oleh sistem saat diminimalkan, dan mendukung integrasi native status bar / HyperOS Hyper Island.
+- **Decision**: Utilize AndroidX Media3 (`PlaybackService`) with `mediaPlayback` foreground service type.
+- **Rationale**: Fully compliant with Android 12+ background limits, prevents OS process termination when minimized, and supports native MediaSession status bar integrations.
 
 ### ADR-003: Koin Dependency Injection
-- **Keputusan**: Menggunakan Koin daripada Dagger/Hilt.
-- **Alasan**: Waktu kompilasi jauh lebih cepat (tanpa kapt/ksp overhead untuk DI), DSL Kotlin yang mudah dibaca, dan modularitas yang sangat fleksibel.
+- **Decision**: Use Koin rather than Dagger/Hilt.
+- **Rationale**: Significantly faster compilation times (no kapt/ksp code-gen overhead for DI), concise Kotlin DSL, and lightweight runtime footprint.
 
-### ADR-004: Room SQLite dengan Reset Bulanan Otomatis
-- **Keputusan**: Melacak riwayat dan frekuensi putar lagu di Room database, dengan filter reset bulanan pada tanggal 1 setiap bulannya untuk bagian "Yang Sering Kamu Putar".
-- **Alasan**: Menjaga daftar lagu teratas selalu relevan dengan preferensi mendengarkan pengguna di bulan berjalan.
-
----
-
-## 6. Prinsip Keamanan & Privasi
-
-1. **Zero Data Telemetry**: Tidak ada analitik, pelacakan privasi, atau pengiriman data ke pihak ketiga.
-2. **Encrypted Local Storage**: Data lokal disimpan di penyimpanan privat internal aplikasi (`data/data/com.asla.denge`).
-3. **No Credential Phishing**: Aplikasi tidak meminta password akun Google maupun kredensial sensitif.
-4. **Ad-Free Pipeline**: Filter URL audio murni mengambil format audio stream, sehingga konten iklan tidak pernah dimuat ke dalam ExoPlayer.
+### ADR-004: Room SQLite with Automatic Monthly Reset
+- **Decision**: Record playback history and play count frequency in Room database, with an automated monthly reset on the 1st of every month for "Your Top Plays".
+- **Rationale**: Keeps top-played music recommendations fresh and relevant to the user's current listening habits.
 
 ---
 
-*Terakhir diperbarui: 27 September 2026 — Déngé v1.3.2*
+## 6. Security & Privacy Principles
+
+1. **Zero Data Telemetry**: No tracking SDKs, analytics, or third-party diagnostic reporting.
+2. **Encrypted Local Storage**: Data is kept securely in the app's private sandbox (`data/data/com.asla.denge`).
+3. **No Credential Phishing**: The app never prompts for Google passwords or sensitive private keys.
+4. **Ad-Free Pipeline**: Direct audio URL extractors target pure audio stream formats, guaranteeing that video ad segments are never passed to ExoPlayer.

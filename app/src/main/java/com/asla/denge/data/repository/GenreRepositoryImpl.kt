@@ -44,7 +44,25 @@ class GenreRepositoryImpl(
             return defaultGenres
         }
         return try {
-            json.decodeFromString<List<MusicGenre>>(savedJson)
+            val savedList = json.decodeFromString<List<MusicGenre>>(savedJson)
+            val defaultMap = defaultGenres.associateBy { it.id }
+            val mergedList = savedList.map { saved ->
+                val default = defaultMap[saved.id]
+                if (default != null) {
+                    // Update to modern English name, subtitle, icon, searchQuery while preserving selection
+                    default.copy(isSelected = saved.isSelected)
+                } else {
+                    saved
+                }
+            }
+            val existingIds = mergedList.map { it.id }.toSet()
+            val missingDefaults = defaultGenres.filter { it.id !in existingIds }
+            val finalList = mergedList + missingDefaults
+            try {
+                val serialized = json.encodeToString(finalList)
+                prefs.edit().putString(KEY_GENRES_LIST, serialized).apply()
+            } catch (_: Exception) {}
+            finalList
         } catch (_: Exception) {
             defaultGenres
         }
@@ -97,7 +115,7 @@ class GenreRepositoryImpl(
         val newGenre = MusicGenre(
             id = id,
             name = cleanName,
-            subtitle = "Genre kustom Anda",
+            subtitle = "Your custom genre",
             searchQuery = cleanQuery,
             icon = "✨",
             isCustom = true,

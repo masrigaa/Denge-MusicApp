@@ -412,8 +412,8 @@ class InnertubeClient(
             } catch (_: Exception) {}
         }
 
-        // 2. Fetch trending Indonesian songs for an immediate rich home feed
-        val trendingSongs = search("Lagu Hits Populer Indonesia").songs
+        // 2. Fetch trending popular songs for an immediate rich home feed
+        val trendingSongs = search("Top Popular Music Hits").songs
         if (trendingSongs.isNotEmpty()) {
             return trendingSongs
         }
