@@ -32,6 +32,8 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.MusicNote
@@ -96,6 +98,8 @@ fun PlayerScreen(
 ) {
     val playerState by viewModel.playerState.collectAsState()
     val isLiked by viewModel.isCurrentTrackLiked.collectAsState()
+    val isDownloaded by viewModel.isCurrentTrackDownloaded.collectAsState()
+    val downloadStatuses by viewModel.downloadStatuses.collectAsState()
     val userPlaylists by viewModel.userPlaylists.collectAsState(initial = emptyList())
     val context = LocalContext.current
 
@@ -547,6 +551,41 @@ fun PlayerScreen(
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Download Track Button
+                    val dlStatus = downloadStatuses[track.videoId]
+                    val isDownloading = dlStatus is com.asla.denge.player.DownloadStatus.Downloading
+
+                    IconButton(
+                        onClick = {
+                            if (!isDownloading) {
+                                val willDownload = !isDownloaded
+                                viewModel.toggleDownloadCurrentTrack()
+                                android.widget.Toast.makeText(
+                                    context,
+                                    if (willDownload) "Downloading track for offline playback... 📥" else "Removed from offline downloads 🗑️",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    ) {
+                        if (isDownloading) {
+                            val progress = (dlStatus as com.asla.denge.player.DownloadStatus.Downloading).progress
+                            CircularProgressIndicator(
+                                progress = { if (progress > 0f) progress else 0.5f },
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.5.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        } else {
+                            Icon(
+                                imageVector = if (isDownloaded) Icons.Filled.DownloadDone else Icons.Default.Download,
+                                contentDescription = if (isDownloaded) "Downloaded" else "Download Track",
+                                tint = if (isDownloaded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(28.dp),
+                            )
+                        }
+                    }
+
                     // Like Song Button
                     IconButton(onClick = {
                         val willLike = !isLiked

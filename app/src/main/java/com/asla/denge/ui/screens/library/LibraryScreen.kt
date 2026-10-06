@@ -22,8 +22,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
@@ -67,10 +69,11 @@ fun LibraryScreen(
 ) {
     val playlists by viewModel.playlists.collectAsState()
     val likedSongs by viewModel.likedSongs.collectAsState()
+    val downloadedTracks by viewModel.downloadedTracks.collectAsState()
     val history by viewModel.history.collectAsState()
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Playlists", "Liked Songs", "History")
+    val tabs = listOf("Playlists", "Liked Songs", "Downloaded", "History")
 
     var showCreatePlaylistDialog by remember { mutableStateOf(false) }
     var newPlaylistName by remember { mutableStateOf("") }
@@ -378,6 +381,64 @@ fun LibraryScreen(
                         }
                     }
                     2 -> {
+                        // Downloaded songs tab (Offline)
+                        if (downloadedTracks.isEmpty()) {
+                            EmptyStateView(
+                                icon = Icons.Default.Download,
+                                title = "No Downloaded Songs",
+                                description = "Download songs from the player to listen offline anytime without internet.",
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                item {
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            text = if (downloadedTracks.size == 1) "1 Offline Track" else "${downloadedTracks.size} Offline Tracks",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                        )
+                                        Button(
+                                            onClick = { viewModel.playTrack(downloadedTracks.first(), downloadedTracks) },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                            ),
+                                            shape = RoundedCornerShape(12.dp),
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.PlayArrow,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp),
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text("Play All")
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                }
+                                itemsIndexed(downloadedTracks, key = { idx, item -> "dl_${item.videoId}_$idx" }) { _, track ->
+                                    TrackItem(
+                                        track = track,
+                                        onClick = { viewModel.playTrack(track, downloadedTracks) },
+                                        onPlayNext = { viewModel.playNext(track) },
+                                        onAddToQueue = { viewModel.addToQueue(track) },
+                                        onDelete = { viewModel.deleteDownloadedTrack(track.videoId) },
+                                    )
+                                }
+                                item { Spacer(modifier = Modifier.height(88.dp)) }
+                            }
+                        }
+                    }
+                    3 -> {
                         // History tab - 100% safe from duplicate keys
                         if (history.isEmpty()) {
                             EmptyStateView(

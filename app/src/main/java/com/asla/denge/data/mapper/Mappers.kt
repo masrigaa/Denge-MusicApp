@@ -59,3 +59,14 @@ fun Playlist.toEntity(cachedAt: Long = System.currentTimeMillis()): CachedPlayli
     )
 }
 
+fun com.asla.denge.data.local.entity.DownloadedTrackEntity.toDomain(): Track {
+    return Track(
+        videoId = videoId,
+        title = title,
+        artistName = artistName,
+        durationMs = durationMs,
+        thumbnailUrl = localThumbnailPath ?: thumbnailUrl,
+    )
+}
+
+
