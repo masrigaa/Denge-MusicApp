@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.asla.denge.domain.model.Playlist
 import com.asla.denge.domain.model.Track
 import com.asla.denge.domain.repository.MusicRepository
+import com.asla.denge.player.DownloadManager
 import com.asla.denge.player.PlayerManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,7 +16,15 @@ import kotlinx.coroutines.launch
 class LibraryViewModel(
     private val musicRepository: MusicRepository,
     private val playerManager: PlayerManager,
+    private val downloadManager: DownloadManager,
 ) : ViewModel() {
+
+    val downloadedTracks: StateFlow<List<Track>> = musicRepository.getDownloadedTracks()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     val playlists: StateFlow<List<Playlist>> = musicRepository.getPlaylists()
         .stateIn(
@@ -66,6 +75,10 @@ class LibraryViewModel(
 
     fun getPlaylistTracks(playlistId: String): Flow<List<Track>> {
         return musicRepository.getPlaylistTracks(playlistId)
+    }
+
+    fun deleteDownloadedTrack(videoId: String) {
+        downloadManager.deleteDownloadedTrack(videoId)
     }
 }
 

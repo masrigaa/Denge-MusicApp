@@ -15,6 +15,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
@@ -62,6 +63,7 @@ class PlayerManager(
     private val musicRepository: MusicRepository,
     private val playbackCacheManager: PlaybackCacheManager,
     private val settingsRepository: com.asla.denge.domain.repository.SettingsRepository,
+    private val downloadManager: DownloadManager,
 ) {
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
@@ -75,6 +77,10 @@ class PlayerManager(
     private val cachedDataSourceFactory =
         playbackCacheManager.createCacheDataSourceFactory(httpDataSourceFactory)
 
+    // DefaultDataSource.Factory handles BOTH local file:// URIs AND remote http(s)://
+    // It automatically delegates file:// to FileDataSource, and http:// to the cache upstream.
+    private val compositeDataSourceFactory = DefaultDataSource.Factory(context, cachedDataSourceFactory)
+
     private val loadControl = DefaultLoadControl.Builder()
         .setBufferDurationsMs(
             /* minBufferMs = */ 60_000,
@@ -87,7 +93,7 @@ class PlayerManager(
         .build()
 
     val exoPlayer: ExoPlayer = ExoPlayer.Builder(context)
-        .setMediaSourceFactory(DefaultMediaSourceFactory(context).setDataSourceFactory(cachedDataSourceFactory))
+        .setMediaSourceFactory(DefaultMediaSourceFactory(context).setDataSourceFactory(compositeDataSourceFactory))
         .setLoadControl(loadControl)
         .setAudioAttributes(
             AudioAttributes.Builder()
@@ -226,8 +232,9 @@ class PlayerManager(
                         }
                         val duration = exoPlayer.duration
                         val pos = exoPlayer.currentPosition.coerceAtLeast(lastKnownPositionMs)
-                        // If track unexpectedly ended with more than 15s remaining, it was a network drop, NOT real end!
-                        if (duration > 30_000L && (duration - pos) > 15_000L) {
+                        val isLocal = _playerState.value.currentTrack?.let { downloadManager.getLocalAudioFile(it.videoId) != null } ?: false
+                        // If track unexpectedly ended with more than 15s remaining, it was a network drop (only relevant for online streams)
+                        if (!isLocal && duration > 30_000L && (duration - pos) > 15_000L) {
                             val current = _playerState.value.currentTrack
                             if (current != null) {
                                 loadAndPlay(current, startPositionMs = pos)
@@ -363,16 +370,26 @@ class PlayerManager(
                 val artUrl = toHdThumbnailUrl(track.thumbnailUrl, track.videoId)
                     ?: getFallbackThumbnailUrl(track.videoId)
 
+                val localAudioFile = downloadManager.getLocalAudioFile(track.videoId)
                 val preloaded = preloadedUrls.remove(track.videoId)
                 val (streamUrl, artBytes) = coroutineScope {
                     val streamDeferred = async(Dispatchers.IO) {
-                        preloaded ?: run {
-                            val quality = settingsRepository.getAudioQualitySync().id
-                            musicRepository.getStreamUrl(track.videoId, quality)
+                        if (localAudioFile != null && localAudioFile.exists()) {
+                            Uri.fromFile(localAudioFile).toString()
+                        } else {
+                            preloaded ?: run {
+                                val quality = settingsRepository.getAudioQualitySync().id
+                                musicRepository.getStreamUrl(track.videoId, quality)
+                            }
                         }
                     }
                     val artDeferred = async(Dispatchers.IO) {
-                        getOrFetchArtworkBytes(track.videoId, artUrl)
+                        val localThumb = downloadManager.getLocalThumbnailFile(track.videoId)
+                        if (localThumb != null && localThumb.exists()) {
+                            localThumb.readBytes()
+                        } else {
+                            getOrFetchArtworkBytes(track.videoId, artUrl)
+                        }
                     }
                     Pair(streamDeferred.await(), artDeferred.await())
                 }
@@ -411,8 +428,11 @@ class PlayerManager(
                     onAudioSessionIdAvailable?.invoke(sessionId)
                 }
 
-                // Background fetch related tracks (only when repeat is OFF to lock playlist during loop)
-                if (_playerState.value.repeatMode == RepeatMode.OFF) {
+                // Background fetch related tracks only when repeat is OFF and queue is not offline-only
+                val isQueueDownloadedOnly = _playerState.value.queue.all { qTrack ->
+                    downloadManager.getLocalAudioFile(qTrack.videoId) != null
+                }
+                if (_playerState.value.repeatMode == RepeatMode.OFF && !isQueueDownloadedOnly) {
                     val shouldForceRadio = _playerState.value.queue.size <= 1
                     fetchRelatedTracksInternal(track, force = shouldForceRadio)
                 }
@@ -649,7 +669,12 @@ class PlayerManager(
             }
             loadAndPlay(firstTrack, startPositionMs = 0L)
         } else if (currentState.repeatMode == RepeatMode.OFF) {
-            // Queue is exhausted & repeat is OFF: fetch related and auto-play seamlessly
+            // Queue is exhausted & repeat is OFF: fetch related and auto-play seamlessly (online mode only)
+            val isQueueDownloadedOnly = queue.all { downloadManager.getLocalAudioFile(it.videoId) != null }
+            if (isQueueDownloadedOnly) {
+                // In offline mode, do not append online tracks; simply finish or loop if desired
+                return
+            }
             scope.launch {
                 val current = currentState.currentTrack
                 if (current != null) {

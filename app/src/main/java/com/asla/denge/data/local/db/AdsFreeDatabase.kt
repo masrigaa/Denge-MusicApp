@@ -36,9 +36,10 @@ import kotlinx.coroutines.launch
         QueueItemEntity::class,
         SearchHistoryEntity::class,
         EqPresetEntity::class,
+        com.asla.denge.data.local.entity.DownloadedTrackEntity::class,
     ],
-    version = 1,
-    exportSchema = true,
+    version = 2,
+    exportSchema = false,
 )
 abstract class AdsFreeDatabase : RoomDatabase() {
 
@@ -49,6 +50,7 @@ abstract class AdsFreeDatabase : RoomDatabase() {
     abstract fun queueDao(): QueueDao
     abstract fun searchHistoryDao(): SearchHistoryDao
     abstract fun eqPresetDao(): EqPresetDao
+    abstract fun downloadDao(): com.asla.denge.data.local.dao.DownloadDao
 
     companion object {
         private const val DB_NAME = "adsfreemusic.db"

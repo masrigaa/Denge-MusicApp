@@ -33,6 +33,7 @@ class MusicRepositoryImpl(
     private val playlistTrackDao: PlaylistTrackDao,
     private val historyDao: HistoryDao,
     private val authRepository: AuthRepository,
+    private val downloadDao: com.asla.denge.data.local.dao.DownloadDao,
 ) : MusicRepository {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -482,6 +483,39 @@ class MusicRepositoryImpl(
                     source = source,
                 )
             )
+        } catch (_: Exception) {}
+    }
+
+    override fun getDownloadedTracks(): Flow<List<Track>> {
+        return downloadDao.getAllDownloadedTracks().map { list ->
+            list.map { it.toDomain() }
+        }
+    }
+
+    override fun isTrackDownloaded(videoId: String): Flow<Boolean> {
+        return downloadDao.isTrackDownloaded(videoId)
+    }
+
+    override suspend fun isTrackDownloadedSync(videoId: String): Boolean {
+        return downloadDao.isTrackDownloadedSync(videoId)
+    }
+
+    override suspend fun deleteDownloadedTrack(videoId: String) {
+        try {
+            val record = downloadDao.getDownloadedTrack(videoId)
+            if (record != null) {
+                val file = java.io.File(record.localFilePath)
+                if (file.exists()) {
+                    file.delete()
+                }
+                record.localThumbnailPath?.let { thumbPath ->
+                    val thumbFile = java.io.File(thumbPath)
+                    if (thumbFile.exists()) {
+                        thumbFile.delete()
+                    }
+                }
+            }
+            downloadDao.delete(videoId)
         } catch (_: Exception) {}
     }
 
