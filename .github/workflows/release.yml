@@ -50,7 +50,6 @@ jobs:
                   if [ -n "${{ github.event.inputs.tag_name }}" ]; then
                       TAG_NAME="${{ github.event.inputs.tag_name }}"
                   fi
-                  cp app/build/outputs/apk/debug/app-debug.apk "Denge-${TAG_NAME}.apk"
                   cp app/build/outputs/apk/debug/app-debug.apk "Denge.apk"
                   echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
 
@@ -62,8 +61,6 @@ jobs:
                   generate_release_notes: true
                   draft: false
                   prerelease: false
-                  files: |
-                      Denge-${{ steps.prepare_asset.outputs.tag_name }}.apk
-                      Denge.apk
+                  files: Denge.apk
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
