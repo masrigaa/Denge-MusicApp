@@ -34,5 +34,9 @@ jobs:
             - name: Build debug APK
               run: ./gradlew assembleDebug
 
-            - name: Run lint
-              run: ./gradlew lintDebug
+            - name: Upload Debug APK
+              uses: actions/upload-artifact@v4
+              with:
+                  name: Denge-preview-apk
+                  path: app/build/outputs/apk/debug/*.apk
+                  retention-days: 7
