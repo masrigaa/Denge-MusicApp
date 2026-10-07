@@ -9,8 +9,7 @@ on:
             - main
 
 jobs:
-    CI:
-        name: CI
+    build:
         runs-on: ubuntu-latest
 
         steps:
