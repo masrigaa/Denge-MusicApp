@@ -73,6 +73,61 @@ class DownloadManager(
                 Log.w("DownloadManager", "Error observing downloaded tracks cache: ${e.message}")
             }
         }
+        scope.launch {
+            recoverExistingDownloads()
+        }
+    }
+
+    private suspend fun recoverExistingDownloads() {
+        try {
+            val dir = publicDownloadsDir
+            if (!dir.exists() || !dir.isDirectory) return
+            val audioFiles = dir.listFiles { file ->
+                file.isFile && file.extension.lowercase() in listOf("m4a", "opus", "mp3")
+            } ?: return
+            if (audioFiles.isEmpty()) return
+
+            val existingTracks = downloadDao.getAllDownloadedTracksList()
+            val existingPaths = existingTracks.map { it.localFilePath }.toSet()
+            val existingIds = existingTracks.map { it.videoId }.toSet()
+
+            for (audioFile in audioFiles) {
+                if (audioFile.length() < 1024) continue
+                if (audioFile.absolutePath in existingPaths) continue
+
+                val baseName = audioFile.nameWithoutExtension
+                val (title, artist) = if (baseName.contains(" - ")) {
+                    val parts = baseName.split(" - ", limit = 2)
+                    parts[0].trim() to parts[1].trim()
+                } else {
+                    baseName.trim() to "Offline Track"
+                }
+
+                val videoId = if (baseName.length == 11 && !baseName.contains(" ")) {
+                    baseName
+                } else {
+                    "offline_" + java.lang.Math.abs(audioFile.name.hashCode()).toString()
+                }
+
+                if (videoId in existingIds) continue
+
+                val recoveredEntity = DownloadedTrackEntity(
+                    videoId = videoId,
+                    title = title.ifBlank { "Offline Track" },
+                    artistName = artist.ifBlank { "Unknown Artist" },
+                    durationMs = 0L,
+                    thumbnailUrl = null,
+                    localFilePath = audioFile.absolutePath,
+                    localThumbnailPath = null,
+                    fileSizeBytes = audioFile.length(),
+                    downloadedAt = audioFile.lastModified(),
+                )
+                downloadDao.insert(recoveredEntity)
+                localPathCache[videoId] = audioFile.absolutePath
+            }
+        } catch (e: Exception) {
+            Log.w("DownloadManager", "Auto-recovery failed: ${e.message}")
+        }
     }
 
     private fun sanitizeFilename(name: String): String {

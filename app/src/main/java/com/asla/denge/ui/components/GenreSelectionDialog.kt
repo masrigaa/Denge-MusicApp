@@ -81,7 +81,7 @@ fun GenreSelectionDialog(
             text = {
                 Column {
                     Text(
-                        text = "Enter a genre name, artist, or theme (e.g. Hololive, Ado, Synthwave, Lofi)",
+                        text = "Enter a genre name, artist, or music theme (e.g. Indie, Jazz, Acoustic, Synthwave, Lo-Fi)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -90,7 +90,7 @@ fun GenreSelectionDialog(
                         value = customGenreName,
                         onValueChange = { customGenreName = it },
                         label = { Text("Genre Name") },
-                        placeholder = { Text("e.g. Hololive / Ado") },
+                        placeholder = { Text("e.g. Acoustic / Indie Rock") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -100,7 +100,7 @@ fun GenreSelectionDialog(
                         value = customSearchQuery,
                         onValueChange = { customSearchQuery = it },
                         label = { Text("Search Keywords (Optional)") },
-                        placeholder = { Text("e.g. hololive original songs") },
+                        placeholder = { Text("e.g. acoustic guitar chill vibes") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),

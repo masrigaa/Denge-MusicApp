@@ -15,6 +15,9 @@ interface DownloadDao {
     @Query("SELECT * FROM downloaded_tracks ORDER BY downloaded_at DESC")
     fun getAllDownloadedTracks(): Flow<List<DownloadedTrackEntity>>
 
+    @Query("SELECT * FROM downloaded_tracks")
+    suspend fun getAllDownloadedTracksList(): List<DownloadedTrackEntity>
+
     @Query("SELECT * FROM downloaded_tracks WHERE video_id = :videoId LIMIT 1")
     suspend fun getDownloadedTrack(videoId: String): DownloadedTrackEntity?
 

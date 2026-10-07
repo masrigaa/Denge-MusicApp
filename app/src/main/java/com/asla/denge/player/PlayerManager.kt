@@ -428,11 +428,8 @@ class PlayerManager(
                     onAudioSessionIdAvailable?.invoke(sessionId)
                 }
 
-                // Background fetch related tracks when repeat is OFF, unless playing an explicit multi-track offline playlist
-                val isExplicitOfflinePlaylist = _playerState.value.queue.size > 1 && _playerState.value.queue.all { qTrack ->
-                    downloadManager.getLocalAudioFile(qTrack.videoId) != null
-                }
-                if (_playerState.value.repeatMode == RepeatMode.OFF && !isExplicitOfflinePlaylist) {
+                // Background fetch related tracks when repeat is OFF
+                if (_playerState.value.repeatMode == RepeatMode.OFF) {
                     val shouldForceRadio = _playerState.value.queue.size <= 1
                     fetchRelatedTracksInternal(track, force = shouldForceRadio)
                 }
@@ -670,11 +667,6 @@ class PlayerManager(
             loadAndPlay(firstTrack, startPositionMs = 0L)
         } else if (currentState.repeatMode == RepeatMode.OFF) {
             // Queue is exhausted & repeat is OFF: fetch related and auto-play seamlessly
-            val isExplicitOfflinePlaylist = queue.size > 1 && queue.all { downloadManager.getLocalAudioFile(it.videoId) != null }
-            if (isExplicitOfflinePlaylist) {
-                // In explicit offline playlist mode, do not append online tracks; simply finish
-                return
-            }
             scope.launch {
                 val current = currentState.currentTrack
                 if (current != null) {
