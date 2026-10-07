@@ -488,16 +488,50 @@ class MusicRepositoryImpl(
 
     override fun getDownloadedTracks(): Flow<List<Track>> {
         return downloadDao.getAllDownloadedTracks().map { list ->
-            list.map { it.toDomain() }
+            list.mapNotNull { entity ->
+                val file = java.io.File(entity.localFilePath)
+                if (file.exists() && file.length() > 1024) {
+                    entity.toDomain()
+                } else {
+                    try {
+                        downloadDao.delete(entity.videoId)
+                    } catch (_: Exception) {}
+                    null
+                }
+            }
         }
     }
 
     override fun isTrackDownloaded(videoId: String): Flow<Boolean> {
-        return downloadDao.isTrackDownloaded(videoId)
+        return downloadDao.getAllDownloadedTracks().map { list ->
+            val entity = list.firstOrNull { it.videoId == videoId }
+            if (entity != null) {
+                val file = java.io.File(entity.localFilePath)
+                if (file.exists() && file.length() > 1024) {
+                    true
+                } else {
+                    try {
+                        downloadDao.delete(videoId)
+                    } catch (_: Exception) {}
+                    false
+                }
+            } else {
+                false
+            }
+        }
     }
 
     override suspend fun isTrackDownloadedSync(videoId: String): Boolean {
-        return downloadDao.isTrackDownloadedSync(videoId)
+        val record = downloadDao.getDownloadedTrack(videoId) ?: return false
+        val file = java.io.File(record.localFilePath)
+        return if (file.exists() && file.length() > 1024) {
+            true
+        } else {
+            try {
+                downloadDao.delete(videoId)
+            } catch (_: Exception) {}
+            false
+        }
     }
 
     override suspend fun deleteDownloadedTrack(videoId: String) {

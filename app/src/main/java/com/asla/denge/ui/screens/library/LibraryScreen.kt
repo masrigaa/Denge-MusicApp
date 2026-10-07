@@ -414,7 +414,7 @@ fun LibraryScreen(
                                             color = MaterialTheme.colorScheme.primary,
                                         )
                                         Button(
-                                            onClick = { viewModel.playTrack(downloadedTracks.first(), downloadedTracks) },
+                                            onClick = { viewModel.playDownloadedTrack(downloadedTracks.first(), downloadedTracks) },
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.primary,
                                                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -435,7 +435,7 @@ fun LibraryScreen(
                                 itemsIndexed(downloadedTracks, key = { idx, item -> "dl_${item.videoId}_$idx" }) { _, track ->
                                     TrackItem(
                                         track = track,
-                                        onClick = { viewModel.playTrack(track, downloadedTracks) },
+                                        onClick = { viewModel.playDownloadedTrack(track, downloadedTracks) },
                                         onPlayNext = { viewModel.playNext(track) },
                                         onAddToQueue = { viewModel.addToQueue(track) },
                                         onDelete = { viewModel.deleteDownloadedTrack(track.videoId) },

@@ -63,11 +63,19 @@ class DownloadManager(
         scope.launch {
             try {
                 downloadDao.getAllDownloadedTracks().collect { list ->
+                    val activeKeys = mutableSetOf<String>()
                     list.forEach { track ->
                         if (track.localFilePath.isNotBlank()) {
-                            localPathCache[track.videoId] = track.localFilePath
+                            val f = File(track.localFilePath)
+                            if (f.exists() && f.length() > 1024) {
+                                localPathCache[track.videoId] = track.localFilePath
+                                activeKeys.add(track.videoId)
+                            } else {
+                                downloadDao.delete(track.videoId)
+                            }
                         }
                     }
+                    localPathCache.keys.retainAll(activeKeys)
                 }
             } catch (e: Exception) {
                 Log.w("DownloadManager", "Error observing downloaded tracks cache: ${e.message}")
@@ -80,6 +88,16 @@ class DownloadManager(
 
     private suspend fun recoverExistingDownloads() {
         try {
+            // First: Clean up any DB records for files that have been deleted externally
+            val existingTracks = downloadDao.getAllDownloadedTracksList()
+            for (track in existingTracks) {
+                val f = File(track.localFilePath)
+                if (!f.exists() || f.length() < 1024) {
+                    downloadDao.delete(track.videoId)
+                    localPathCache.remove(track.videoId)
+                }
+            }
+
             val dir = publicDownloadsDir
             if (!dir.exists() || !dir.isDirectory) return
             val audioFiles = dir.listFiles { file ->
@@ -87,9 +105,9 @@ class DownloadManager(
             } ?: return
             if (audioFiles.isEmpty()) return
 
-            val existingTracks = downloadDao.getAllDownloadedTracksList()
-            val existingPaths = existingTracks.map { it.localFilePath }.toSet()
-            val existingIds = existingTracks.map { it.videoId }.toSet()
+            val remainingTracks = downloadDao.getAllDownloadedTracksList()
+            val existingPaths = remainingTracks.map { it.localFilePath }.toSet()
+            val existingIds = remainingTracks.map { it.videoId }.toSet()
 
             for (audioFile in audioFiles) {
                 if (audioFile.length() < 1024) continue
@@ -145,7 +163,14 @@ class DownloadManager(
         val cachedPath = localPathCache[videoId]
         if (!cachedPath.isNullOrBlank()) {
             val cachedFile = File(cachedPath)
-            if (cachedFile.exists() && cachedFile.length() > 1024) return cachedFile
+            if (cachedFile.exists() && cachedFile.length() > 1024) {
+                return cachedFile
+            } else {
+                localPathCache.remove(videoId)
+                scope.launch {
+                    try { downloadDao.delete(videoId) } catch (_: Exception) {}
+                }
+            }
         }
 
         // 2. Check public Denge folder with videoId (legacy / backwards compatibility)

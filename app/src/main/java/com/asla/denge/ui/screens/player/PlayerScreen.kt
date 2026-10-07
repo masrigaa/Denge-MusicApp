@@ -762,7 +762,7 @@ fun PlayerScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Up Next • Radio Queue",
+                            text = if (playerState.isOfflineQueue) "Up Next • Downloaded" else "Up Next • Radio Queue",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,

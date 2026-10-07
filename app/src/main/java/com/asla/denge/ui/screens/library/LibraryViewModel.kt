@@ -50,7 +50,11 @@ class LibraryViewModel(
 
 
     fun playTrack(track: Track, queue: List<Track> = listOf(track)) {
-        playerManager.playTrack(track, queue)
+        playerManager.playTrack(track, queue, isOfflineQueue = false)
+    }
+
+    fun playDownloadedTrack(track: Track, queue: List<Track> = listOf(track)) {
+        playerManager.playTrack(track, queue, isOfflineQueue = true)
     }
 
     fun playNext(track: Track) {

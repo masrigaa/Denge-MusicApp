@@ -55,6 +55,7 @@ data class PlayerState(
     val isShuffleEnabled: Boolean = false,
     val repeatMode: RepeatMode = RepeatMode.OFF,
     val error: String? = null,
+    val isOfflineQueue: Boolean = false,
 )
 
 @OptIn(UnstableApi::class)
@@ -329,7 +330,7 @@ class PlayerManager(
         }
     }
 
-    fun playTrack(track: Track, newQueue: List<Track> = listOf(track)) {
+    fun playTrack(track: Track, newQueue: List<Track> = listOf(track), isOfflineQueue: Boolean = false) {
         val index = newQueue.indexOfFirst { it.videoId == track.videoId }.coerceAtLeast(0)
         lastKnownPositionMs = 0L
         _playerState.update {
@@ -340,6 +341,7 @@ class PlayerManager(
                 isBuffering = true,
                 error = null,
                 currentPositionMs = 0L,
+                isOfflineQueue = isOfflineQueue,
             )
         }
 
@@ -371,12 +373,16 @@ class PlayerManager(
                     ?: getFallbackThumbnailUrl(track.videoId)
 
                 val localAudioFile = downloadManager.getLocalAudioFile(track.videoId)
-                val preloaded = preloadedUrls.remove(track.videoId)
+                val isOffline = _playerState.value.isOfflineQueue || (localAudioFile != null && localAudioFile.exists())
+                val preloaded = if (!isOffline) preloadedUrls.remove(track.videoId) else null
                 val (streamUrl, artBytes) = coroutineScope {
                     val streamDeferred = async(Dispatchers.IO) {
                         if (localAudioFile != null && localAudioFile.exists()) {
                             Uri.fromFile(localAudioFile).toString()
                         } else {
+                            if (_playerState.value.isOfflineQueue) {
+                                throw IllegalStateException("Offline track not found on device: ${track.title}")
+                            }
                             preloaded ?: run {
                                 val quality = settingsRepository.getAudioQualitySync().id
                                 musicRepository.getStreamUrl(track.videoId, quality)
@@ -385,8 +391,11 @@ class PlayerManager(
                     }
                     val artDeferred = async(Dispatchers.IO) {
                         val localThumb = downloadManager.getLocalThumbnailFile(track.videoId)
-                        if (localThumb != null && localThumb.exists() && localThumb.length() > 5_000) {
+                        if (localThumb != null && localThumb.exists() && localThumb.length() > 0) {
                             localThumb.readBytes()
+                        } else if (isOffline) {
+                            // Do not make blocking network calls for artwork in offline mode
+                            null
                         } else {
                             getOrFetchArtworkBytes(track.videoId, artUrl)
                         }
@@ -394,10 +403,19 @@ class PlayerManager(
                     Pair(streamDeferred.await(), artDeferred.await())
                 }
 
+                val localThumbFile = downloadManager.getLocalThumbnailFile(track.videoId)
                 val mediaMetadataBuilder = MediaMetadata.Builder()
                     .setTitle(track.title)
                     .setArtist(track.artistName)
-                    .setArtworkUri(artUrl?.let { Uri.parse(it) })
+                    .setArtworkUri(
+                        if (localThumbFile != null && localThumbFile.exists() && localThumbFile.length() > 0) {
+                            Uri.fromFile(localThumbFile)
+                        } else if (!isOffline) {
+                            artUrl?.let { Uri.parse(it) }
+                        } else {
+                            null
+                        }
+                    )
                     .setIsPlayable(true)
                     .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
 
@@ -428,8 +446,8 @@ class PlayerManager(
                     onAudioSessionIdAvailable?.invoke(sessionId)
                 }
 
-                // Background fetch related tracks when repeat is OFF
-                if (_playerState.value.repeatMode == RepeatMode.OFF) {
+                // Background fetch related tracks when repeat is OFF and NOT in offline queue
+                if (_playerState.value.repeatMode == RepeatMode.OFF && !_playerState.value.isOfflineQueue) {
                     val shouldForceRadio = _playerState.value.queue.size <= 1
                     fetchRelatedTracksInternal(track, force = shouldForceRadio)
                 }
@@ -559,16 +577,17 @@ class PlayerManager(
     }
 
     fun fetchRelatedTracks(force: Boolean = false) {
+        if (_playerState.value.isOfflineQueue) return
         val track = _playerState.value.currentTrack ?: return
         fetchRelatedTracksInternal(track, force = force)
     }
 
     private fun fetchRelatedTracksInternal(track: Track, force: Boolean = false) {
-        if (_playerState.value.repeatMode != RepeatMode.OFF) return
+        if (_playerState.value.repeatMode != RepeatMode.OFF || _playerState.value.isOfflineQueue) return
         relatedJob?.cancel()
         relatedJob = scope.launch {
             try {
-                if (_playerState.value.repeatMode != RepeatMode.OFF) return@launch
+                if (_playerState.value.repeatMode != RepeatMode.OFF || _playerState.value.isOfflineQueue) return@launch
                 val currentQueue = _playerState.value.queue
                 val currentIndex = _playerState.value.currentIndex
                 val remainingAhead = (currentQueue.size - 1 - currentIndex).coerceAtLeast(0)
@@ -578,7 +597,7 @@ class PlayerManager(
                     val related = withContext(Dispatchers.IO) {
                         musicRepository.getRelatedTracks(track.videoId, track.artistName, track.title)
                     }
-                    if (_playerState.value.repeatMode != RepeatMode.OFF) return@launch
+                    if (_playerState.value.repeatMode != RepeatMode.OFF || _playerState.value.isOfflineQueue) return@launch
                     if (related.isNotEmpty()) {
                         val latestQueue = _playerState.value.queue
                         val countToAdd = if (force || latestQueue.size <= 2) 10 else 5
@@ -666,6 +685,12 @@ class PlayerManager(
             }
             loadAndPlay(firstTrack, startPositionMs = 0L)
         } else if (currentState.repeatMode == RepeatMode.OFF) {
+            if (currentState.isOfflineQueue) {
+                // For offline queue, stop playback when queue ends
+                exoPlayer.pause()
+                _playerState.update { it.copy(isPlaying = false) }
+                return
+            }
             // Queue is exhausted & repeat is OFF: fetch related and auto-play seamlessly
             scope.launch {
                 val current = currentState.currentTrack
@@ -910,9 +935,12 @@ class PlayerManager(
         if (!shouldPrefetch || prefetchJob?.isActive == true) return
 
         val state = _playerState.value
+        if (state.isOfflineQueue) return
         val nextIdx = state.currentIndex + 1
         if (nextIdx in state.queue.indices) {
             val nextTrack = state.queue[nextIdx]
+            val localAudio = downloadManager.getLocalAudioFile(nextTrack.videoId)
+            if (localAudio != null && localAudio.exists()) return
             if (!preloadedUrls.containsKey(nextTrack.videoId)) {
                 prefetchJob = scope.launch(Dispatchers.IO) {
                     try {
