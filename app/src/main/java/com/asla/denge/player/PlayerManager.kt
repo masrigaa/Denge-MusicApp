@@ -385,7 +385,7 @@ class PlayerManager(
                     }
                     val artDeferred = async(Dispatchers.IO) {
                         val localThumb = downloadManager.getLocalThumbnailFile(track.videoId)
-                        if (localThumb != null && localThumb.exists()) {
+                        if (localThumb != null && localThumb.exists() && localThumb.length() > 5_000) {
                             localThumb.readBytes()
                         } else {
                             getOrFetchArtworkBytes(track.videoId, artUrl)
@@ -428,11 +428,11 @@ class PlayerManager(
                     onAudioSessionIdAvailable?.invoke(sessionId)
                 }
 
-                // Background fetch related tracks only when repeat is OFF and queue is not offline-only
-                val isQueueDownloadedOnly = _playerState.value.queue.all { qTrack ->
+                // Background fetch related tracks when repeat is OFF, unless playing an explicit multi-track offline playlist
+                val isExplicitOfflinePlaylist = _playerState.value.queue.size > 1 && _playerState.value.queue.all { qTrack ->
                     downloadManager.getLocalAudioFile(qTrack.videoId) != null
                 }
-                if (_playerState.value.repeatMode == RepeatMode.OFF && !isQueueDownloadedOnly) {
+                if (_playerState.value.repeatMode == RepeatMode.OFF && !isExplicitOfflinePlaylist) {
                     val shouldForceRadio = _playerState.value.queue.size <= 1
                     fetchRelatedTracksInternal(track, force = shouldForceRadio)
                 }
@@ -669,10 +669,10 @@ class PlayerManager(
             }
             loadAndPlay(firstTrack, startPositionMs = 0L)
         } else if (currentState.repeatMode == RepeatMode.OFF) {
-            // Queue is exhausted & repeat is OFF: fetch related and auto-play seamlessly (online mode only)
-            val isQueueDownloadedOnly = queue.all { downloadManager.getLocalAudioFile(it.videoId) != null }
-            if (isQueueDownloadedOnly) {
-                // In offline mode, do not append online tracks; simply finish or loop if desired
+            // Queue is exhausted & repeat is OFF: fetch related and auto-play seamlessly
+            val isExplicitOfflinePlaylist = queue.size > 1 && queue.all { downloadManager.getLocalAudioFile(it.videoId) != null }
+            if (isExplicitOfflinePlaylist) {
+                // In explicit offline playlist mode, do not append online tracks; simply finish
                 return
             }
             scope.launch {

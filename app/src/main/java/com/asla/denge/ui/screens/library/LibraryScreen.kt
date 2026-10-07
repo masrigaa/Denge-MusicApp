@@ -37,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -262,15 +263,19 @@ fun LibraryScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(14.dp))
-                    TabRow(
+                    ScrollableTabRow(
                         selectedTabIndex = selectedTabIndex,
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.primary,
+                        edgePadding = 0.dp,
+                        divider = {},
                         indicator = { tabPositions ->
-                            TabRowDefaults.SecondaryIndicator(
-                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                color = MaterialTheme.colorScheme.primary,
-                            )
+                            if (selectedTabIndex in tabPositions.indices) {
+                                TabRowDefaults.SecondaryIndicator(
+                                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
                         }
                     ) {
                         tabs.forEachIndexed { index, title ->
@@ -281,6 +286,8 @@ fun LibraryScreen(
                                     Text(
                                         text = title,
                                         style = MaterialTheme.typography.titleMedium,
+                                        maxLines = 1,
+                                        softWrap = false,
                                         fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.SemiBold,
                                         color = if (selectedTabIndex == index) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.onSurfaceVariant,

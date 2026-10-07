@@ -153,13 +153,13 @@ class DownloadManager(
 
                 localPathCache[track.videoId] = targetAudioFile.absolutePath
 
-                // 3. Save thumbnail locally if available
+                // 3. Save thumbnail locally in full HD resolution if available
                 var localThumbPath: String? = null
-                val thumbUrlString = track.thumbnailUrl
-                if (!thumbUrlString.isNullOrBlank()) {
+                val hdThumbUrl = com.asla.denge.util.toHdThumbnailUrl(track.thumbnailUrl, track.videoId)
+                if (hdThumbUrl.isNotBlank()) {
                     try {
                         val thumbFile = File(thumbnailsDir, "${track.videoId}.jpg")
-                        val thumbConn = (URL(thumbUrlString).openConnection() as HttpURLConnection).apply {
+                        val thumbConn = (URL(hdThumbUrl).openConnection() as HttpURLConnection).apply {
                             connectTimeout = 10_000
                             readTimeout = 10_000
                             connect()
@@ -183,7 +183,7 @@ class DownloadManager(
                     title = track.title,
                     artistName = track.artistName,
                     durationMs = track.durationMs,
-                    thumbnailUrl = track.thumbnailUrl,
+                    thumbnailUrl = hdThumbUrl.ifBlank { track.thumbnailUrl },
                     localFilePath = targetAudioFile.absolutePath,
                     localThumbnailPath = localThumbPath,
                     fileSizeBytes = targetAudioFile.length(),
