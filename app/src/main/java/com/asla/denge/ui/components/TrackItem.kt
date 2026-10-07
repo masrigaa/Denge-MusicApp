@@ -59,7 +59,6 @@ fun TrackItem(
     onPlayNext: (() -> Unit)? = null,
     onAddToQueue: (() -> Unit)? = null,
     onRemoveFromQueue: (() -> Unit)? = null,
-    onDelete: (() -> Unit)? = null,
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
     dragHandle: (@Composable () -> Unit)? = null,
@@ -330,31 +329,6 @@ fun TrackItem(
                             showMenu = false
                             onRemoveFromQueue()
                             Toast.makeText(context, "${track.title} removed from queue 🗑️", Toast.LENGTH_SHORT).show()
-                        }
-                    )
-                }
-
-                if (onDelete != null) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = "Delete Download",
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.DeleteOutline,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(20.dp),
-                            )
-                        },
-                        onClick = {
-                            showMenu = false
-                            onDelete()
-                            Toast.makeText(context, "${track.title} deleted 🗑️", Toast.LENGTH_SHORT).show()
                         }
                     )
                 }

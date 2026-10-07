@@ -59,20 +59,3 @@ fun Playlist.toEntity(cachedAt: Long = System.currentTimeMillis()): CachedPlayli
     )
 }
 
-fun com.asla.denge.data.local.entity.DownloadedTrackEntity.toDomain(): Track {
-    val localFile = localThumbnailPath?.let { java.io.File(it) }
-    val effectiveThumb = if (localFile != null && localFile.exists() && localFile.length() > 500) {
-        localFile.absolutePath
-    } else {
-        thumbnailUrl
-    }
-    return Track(
-        videoId = videoId,
-        title = title,
-        artistName = artistName,
-        durationMs = durationMs,
-        thumbnailUrl = effectiveThumb,
-    )
-}
-
-

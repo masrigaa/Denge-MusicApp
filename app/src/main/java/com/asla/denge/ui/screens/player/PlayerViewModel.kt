@@ -5,8 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.asla.denge.domain.model.Playlist
 import com.asla.denge.domain.model.Track
 import com.asla.denge.domain.repository.MusicRepository
-import com.asla.denge.player.DownloadManager
-import com.asla.denge.player.DownloadStatus
 import com.asla.denge.player.PlayerManager
 import com.asla.denge.player.PlayerState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,7 +22,6 @@ import kotlinx.coroutines.launch
 class PlayerViewModel(
     private val playerManager: PlayerManager,
     private val musicRepository: MusicRepository,
-    private val downloadManager: DownloadManager,
 ) : ViewModel() {
 
     val playerState: StateFlow<PlayerState> = playerManager.playerState
@@ -33,30 +30,14 @@ class PlayerViewModel(
     private val _isCurrentTrackLiked = MutableStateFlow(false)
     val isCurrentTrackLiked: StateFlow<Boolean> = _isCurrentTrackLiked.asStateFlow()
 
-    private val _isCurrentTrackDownloaded = MutableStateFlow(false)
-    val isCurrentTrackDownloaded: StateFlow<Boolean> = _isCurrentTrackDownloaded.asStateFlow()
-
-    val downloadStatuses: StateFlow<Map<String, DownloadStatus>> = downloadManager.downloadStatus
-
     init {
         viewModelScope.launch {
             playerState.collect { state ->
                 val videoId = state.currentTrack?.videoId
                 if (videoId != null) {
                     _isCurrentTrackLiked.value = musicRepository.isTrackLikedSync(videoId)
-                    _isCurrentTrackDownloaded.value = musicRepository.isTrackDownloadedSync(videoId)
                 } else {
                     _isCurrentTrackLiked.value = false
-                    _isCurrentTrackDownloaded.value = false
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            downloadManager.downloadStatus.collect {
-                val videoId = playerState.value.currentTrack?.videoId
-                if (videoId != null) {
-                    _isCurrentTrackDownloaded.value = musicRepository.isTrackDownloadedSync(videoId)
                 }
             }
         }
@@ -155,16 +136,5 @@ class PlayerViewModel(
 
     fun cancelSleepTimer() {
         playerManager.cancelSleepTimer()
-    }
-
-    fun toggleDownloadCurrentTrack() {
-        val current = playerState.value.currentTrack ?: return
-        val isDownloaded = _isCurrentTrackDownloaded.value
-        if (isDownloaded) {
-            downloadManager.deleteDownloadedTrack(current.videoId)
-            _isCurrentTrackDownloaded.value = false
-        } else {
-            downloadManager.downloadTrack(current)
-        }
     }
 }

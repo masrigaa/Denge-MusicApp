@@ -81,18 +81,6 @@ interface MusicRepository {
 
     /** Record a track play by videoId (legacy fallback). */
     suspend fun recordPlay(videoId: String, durationPlayedMs: Long, source: String)
-
-    /** Get all tracks saved for offline playback. */
-    fun getDownloadedTracks(): Flow<List<Track>>
-
-    /** Check if a track is downloaded. */
-    fun isTrackDownloaded(videoId: String): Flow<Boolean>
-
-    /** Synchronous check if a track is downloaded. */
-    suspend fun isTrackDownloadedSync(videoId: String): Boolean
-
-    /** Delete downloaded track from local database and filesystem. */
-    suspend fun deleteDownloadedTrack(videoId: String)
 }
 
 /**

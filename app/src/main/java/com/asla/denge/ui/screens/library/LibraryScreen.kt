@@ -22,10 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
@@ -37,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -70,11 +67,10 @@ fun LibraryScreen(
 ) {
     val playlists by viewModel.playlists.collectAsState()
     val likedSongs by viewModel.likedSongs.collectAsState()
-    val downloadedTracks by viewModel.downloadedTracks.collectAsState()
     val history by viewModel.history.collectAsState()
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Playlists", "Liked Songs", "Downloaded", "History")
+    val tabs = listOf("Playlists", "Liked Songs", "History")
 
     var showCreatePlaylistDialog by remember { mutableStateOf(false) }
     var newPlaylistName by remember { mutableStateOf("") }
@@ -263,19 +259,15 @@ fun LibraryScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(14.dp))
-                    ScrollableTabRow(
+                    TabRow(
                         selectedTabIndex = selectedTabIndex,
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.primary,
-                        edgePadding = 0.dp,
-                        divider = {},
                         indicator = { tabPositions ->
-                            if (selectedTabIndex in tabPositions.indices) {
-                                TabRowDefaults.SecondaryIndicator(
-                                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            }
+                            TabRowDefaults.SecondaryIndicator(
+                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                color = MaterialTheme.colorScheme.primary,
+                            )
                         }
                     ) {
                         tabs.forEachIndexed { index, title ->
@@ -286,8 +278,6 @@ fun LibraryScreen(
                                     Text(
                                         text = title,
                                         style = MaterialTheme.typography.titleMedium,
-                                        maxLines = 1,
-                                        softWrap = false,
                                         fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.SemiBold,
                                         color = if (selectedTabIndex == index) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -388,64 +378,6 @@ fun LibraryScreen(
                         }
                     }
                     2 -> {
-                        // Downloaded songs tab (Offline)
-                        if (downloadedTracks.isEmpty()) {
-                            EmptyStateView(
-                                icon = Icons.Default.Download,
-                                title = "No Downloaded Songs",
-                                description = "Download songs from the player to listen offline anytime without internet.",
-                            )
-                        } else {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                item {
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Text(
-                                            text = if (downloadedTracks.size == 1) "1 Offline Track" else "${downloadedTracks.size} Offline Tracks",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary,
-                                        )
-                                        Button(
-                                            onClick = { viewModel.playDownloadedTrack(downloadedTracks.first(), downloadedTracks) },
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.primary,
-                                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                            ),
-                                            shape = RoundedCornerShape(12.dp),
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.PlayArrow,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp),
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Play All")
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                }
-                                itemsIndexed(downloadedTracks, key = { idx, item -> "dl_${item.videoId}_$idx" }) { _, track ->
-                                    TrackItem(
-                                        track = track,
-                                        onClick = { viewModel.playDownloadedTrack(track, downloadedTracks) },
-                                        onPlayNext = { viewModel.playNext(track) },
-                                        onAddToQueue = { viewModel.addToQueue(track) },
-                                        onDelete = { viewModel.deleteDownloadedTrack(track.videoId) },
-                                    )
-                                }
-                                item { Spacer(modifier = Modifier.height(88.dp)) }
-                            }
-                        }
-                    }
-                    3 -> {
                         // History tab - 100% safe from duplicate keys
                         if (history.isEmpty()) {
                             EmptyStateView(

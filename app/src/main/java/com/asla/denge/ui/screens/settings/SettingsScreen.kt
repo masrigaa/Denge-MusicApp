@@ -371,13 +371,6 @@ fun SettingsScreen(
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     SettingsRow(
-                        title = "Offline Storage Location",
-                        value = "Download/Denge 📁",
-                        onClick = null,
-                        isInteractive = false,
-                    )
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    SettingsRow(
                         title = stringResource(R.string.settings_about),
                         value = "v${com.asla.denge.BuildConfig.VERSION_NAME} (Déngé)",
                         onClick = null,

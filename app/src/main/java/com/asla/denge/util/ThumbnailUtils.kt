@@ -10,15 +10,6 @@ fun toHdThumbnailUrl(url: String?, videoId: String? = null): String {
 
     val rawUrl = url?.trim() ?: ""
 
-    // If it's already a local file path, check that it exists and has content before returning
-    if (rawUrl.startsWith("/") || rawUrl.startsWith("file:")) {
-        val cleanPath = rawUrl.removePrefix("file://")
-        val file = java.io.File(cleanPath)
-        if (file.exists() && file.length() > 500) {
-            return "file://$cleanPath"
-        }
-    }
-
     // If it's a YouTube Music album/artist Google CDN URL (high quality album covers)
     if (rawUrl.contains("googleusercontent.com") || rawUrl.contains("ggpht.com")) {
         var hdUrl = rawUrl
@@ -31,6 +22,7 @@ fun toHdThumbnailUrl(url: String?, videoId: String? = null): String {
     }
 
     // For any YouTube video or music video where videoId is available:
+    // https://i.ytimg.com/vi/{id}/hqdefault.jpg is 100% static, signature-free, and universally reliable!
     if (!cleanVideoId.isNullOrBlank()) {
         return "https://i.ytimg.com/vi/$cleanVideoId/hqdefault.jpg"
     }

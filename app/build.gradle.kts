@@ -14,8 +14,8 @@ android {
         applicationId = "com.asla.denge"
         minSdk = 31
         targetSdk = 36
-        versionCode = 161
-        versionName = "1.6.1-Alpha"
+        versionCode = 156
+        versionName = "1.5.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -68,7 +68,6 @@ val databaseModule = module {
     single { get<AdsFreeDatabase>().queueDao() }
     single { get<AdsFreeDatabase>().searchHistoryDao() }
     single { get<AdsFreeDatabase>().eqPresetDao() }
-    single { get<AdsFreeDatabase>().downloadDao() }
 
     single<AuthRepository> {
         AuthRepositoryImpl(context = androidContext(), innertubeClient = get())
@@ -90,7 +89,6 @@ val databaseModule = module {
             playlistTrackDao = get(),
             historyDao = get(),
             authRepository = get(),
-            downloadDao = get(),
         )
     }
 }
@@ -101,28 +99,19 @@ val databaseModule = module {
 val playerModule = module {
     single { com.asla.denge.player.PlaybackCacheManager(context = androidContext()) }
     single {
-        com.asla.denge.player.DownloadManager(
-            context = androidContext(),
-            musicRepository = get(),
-            downloadDao = get(),
-            settingsRepository = get(),
-        )
-    }
-    single {
         PlayerManager(
             context = androidContext(),
             musicRepository = get(),
             playbackCacheManager = get(),
             settingsRepository = get(),
-            downloadManager = get(),
         )
     }
     single(createdAtStart = true) { AudioEffectsManager(playerManager = get(), eqPresetDao = get()) }
 
-    viewModel { PlayerViewModel(playerManager = get(), musicRepository = get(), downloadManager = get()) }
+    viewModel { PlayerViewModel(playerManager = get(), musicRepository = get()) }
     viewModel { HomeViewModel(musicRepository = get(), playerManager = get(), authRepository = get(), genreRepository = get()) }
     viewModel { SearchViewModel(musicRepository = get(), playerManager = get(), searchHistoryDao = get()) }
-    viewModel { LibraryViewModel(musicRepository = get(), playerManager = get(), downloadManager = get()) }
+    viewModel { LibraryViewModel(musicRepository = get(), playerManager = get()) }
     viewModel {
         SettingsViewModel(
             authRepository = get(),
