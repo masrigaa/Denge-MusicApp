@@ -198,6 +198,7 @@ class PlayerManager(
                         _playerState.update { it.copy(isBuffering = true) }
                     }
                     Player.STATE_READY -> {
+                        errorRetryCount = 0
                         val duration = exoPlayer.duration.coerceAtLeast(0L)
                         val pos = exoPlayer.currentPosition.coerceAtLeast(0L)
                         _playerState.update {
@@ -230,6 +231,7 @@ class PlayerManager(
                         if (duration > 30_000L && (duration - pos) > 15_000L) {
                             val current = _playerState.value.currentTrack
                             if (current != null) {
+                                preloadedUrls.remove(current.videoId)
                                 loadAndPlay(current, startPositionMs = pos)
                                 return
                             }
@@ -264,6 +266,7 @@ class PlayerManager(
 
                 if (currentTrack != null && errorRetryCount < 3) {
                     errorRetryCount++
+                    preloadedUrls.remove(currentTrack.videoId)
                     scope.launch {
                         _playerState.update { it.copy(isBuffering = true) }
                         delay(1000L)
@@ -337,6 +340,24 @@ class PlayerManager(
         }
 
         loadAndPlay(track, startPositionMs = 0L)
+    }
+
+    fun playTrackAt(index: Int) {
+        val currentQueue = _playerState.value.queue
+        if (index !in currentQueue.indices) return
+        val targetTrack = currentQueue[index]
+        lastKnownPositionMs = 0L
+        _playerState.update {
+            it.copy(
+                currentTrack = targetTrack,
+                currentIndex = index,
+                isBuffering = true,
+                error = null,
+                currentPositionMs = 0L,
+            )
+        }
+
+        loadAndPlay(targetTrack, startPositionMs = 0L)
     }
 
     private var loadJob: Job? = null

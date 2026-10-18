@@ -73,6 +73,10 @@ class PlayerViewModel(
         playerManager.playTrack(track, queue)
     }
 
+    fun playTrackAt(index: Int) {
+        playerManager.playTrackAt(index)
+    }
+
     fun playNextInQueue(track: Track) {
         playerManager.playNextInQueue(track)
     }

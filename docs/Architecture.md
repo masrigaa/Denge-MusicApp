@@ -173,6 +173,10 @@ Compose UI ◀── StateFlow<SearchUiState> ◀── MusicRepository.search()
 - **Decision**: Record playback history and play count frequency in Room database, with an automated monthly reset on the 1st of every month for "Your Top Plays".
 - **Rationale**: Keeps top-played music recommendations fresh and relevant to the user's current listening habits.
 
+### ADR-005: Up Next Queue Virtualization & HWUI Bounds
+- **Decision**: Avoid monolithic `Column` blocks within scrollable containers; virtualize long queue items directly using Compose `itemsIndexed` while retaining container card visual boundaries via Compose `drawBehind`.
+- **Rationale**: Prevents Android HWUI / RenderNode single-layer texture limits (> 8,192 px) from clipping touch events on items past index 36, ensuring responsive hit-testing and low memory recycling (~7 items active in memory instead of 50+).
+
 ---
 
 ## 6. Security & Privacy Principles

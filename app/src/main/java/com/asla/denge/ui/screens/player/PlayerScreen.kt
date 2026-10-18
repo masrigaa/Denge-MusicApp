@@ -70,6 +70,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -699,15 +704,41 @@ fun PlayerScreen(
             Spacer(modifier = Modifier.height(28.dp))
         }
 
-        // 6. UP NEXT / RADIO QUEUE (Placed directly underneath the controls, just like YouTube Music)
-        item {
-            Column(
+        // 6. UP NEXT / RADIO QUEUE HEADER (Card Top Container matching v1.5.6 aesthetic)
+        item(key = "up_next_header") {
+            val outlineColor = MaterialTheme.colorScheme.outlineVariant
+            val surfaceColor = MaterialTheme.colorScheme.surface
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(20.dp))
-                    .padding(16.dp),
+                    .background(surfaceColor)
+                    .drawBehind {
+                        val stroke = 1.dp.toPx()
+                        val r = 20.dp.toPx()
+                        val halfStroke = stroke / 2f
+                        val path = Path().apply {
+                            moveTo(halfStroke, size.height)
+                            lineTo(halfStroke, r)
+                            arcTo(
+                                rect = Rect(halfStroke, halfStroke, 2 * r - halfStroke, 2 * r - halfStroke),
+                                startAngleDegrees = 180f,
+                                sweepAngleDegrees = 90f,
+                                forceMoveTo = false
+                            )
+                            lineTo(size.width - r, halfStroke)
+                            arcTo(
+                                rect = Rect(size.width - 2 * r + halfStroke, halfStroke, size.width - halfStroke, 2 * r - halfStroke),
+                                startAngleDegrees = 270f,
+                                sweepAngleDegrees = 90f,
+                                forceMoveTo = false
+                            )
+                            lineTo(size.width - halfStroke, size.height)
+                        }
+                        drawPath(path, color = outlineColor, style = Stroke(width = stroke))
+                    }
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 10.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -735,68 +766,123 @@ fun PlayerScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
 
-                if (queue.isNotEmpty()) {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        val density = LocalDensity.current
-                        val stepPx = with(density) { 52.dp.toPx() }
-                        queue.forEachIndexed { idx, qTrack ->
-                            var accumulatedY by remember(qTrack.videoId, idx) { mutableFloatStateOf(0f) }
-                            TrackItem(
-                                track = qTrack,
-                                isPlaying = idx == currentIndex,
-                                onClick = {
-                                    viewModel.playTrack(qTrack, queue)
-                                },
-                                onPlayNext = {
-                                    viewModel.playNextInQueue(qTrack)
-                                },
-                                onAddToQueue = {
-                                    viewModel.addToQueue(qTrack)
-                                },
-                                onRemoveFromQueue = {
-                                    viewModel.removeFromQueue(idx)
-                                },
-                                onMoveUp = if (idx > 0) {
-                                    { viewModel.moveQueueItem(idx, idx - 1) }
-                                } else null,
-                                onMoveDown = if (idx < queue.size - 1) {
-                                    { viewModel.moveQueueItem(idx, idx + 1) }
-                                } else null,
-                                dragHandle = {
-                                    Icon(
-                                        imageVector = Icons.Default.DragHandle,
-                                        contentDescription = "Reorder track",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier
-                                            .size(38.dp)
-                                            .padding(6.dp)
-                                            .pointerInput(qTrack.videoId, idx, queue.size) {
-                                                detectDragGestures(
-                                                    onDragStart = { accumulatedY = 0f },
-                                                    onDrag = { change, dragAmount ->
-                                                        change.consume()
-                                                        accumulatedY += dragAmount.y
-                                                        if (accumulatedY > stepPx && idx < queue.size - 1) {
-                                                             viewModel.moveQueueItem(idx, idx + 1)
-                                                            accumulatedY = 0f
-                                                        } else if (accumulatedY < -stepPx && idx > 0) {
-                                                            viewModel.moveQueueItem(idx, idx - 1)
-                                                            accumulatedY = 0f
-                                                        }
-                                                    },
-                                                    onDragEnd = { accumulatedY = 0f },
-                                                    onDragCancel = { accumulatedY = 0f }
-                                                )
-                                            }
-                                    )
-                                },
-                            )
-                        }
+        // 7. UP NEXT ITEMS (Virtualized with itemsIndexed for lightweight performance, low RAM, and unlimited clickable queue depth)
+        itemsIndexed(
+            items = queue,
+            key = { idx, item -> "queue_${idx}_${item.videoId}" }
+        ) { idx, qTrack ->
+            val outlineColor = MaterialTheme.colorScheme.outlineVariant
+            val surfaceColor = MaterialTheme.colorScheme.surface
+            val density = LocalDensity.current
+            val stepPx = with(density) { 52.dp.toPx() }
+            var accumulatedY by remember(qTrack.videoId, idx) { mutableFloatStateOf(0f) }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(surfaceColor)
+                    .drawBehind {
+                        val stroke = 1.dp.toPx()
+                        val halfStroke = stroke / 2f
+                        drawLine(outlineColor, Offset(halfStroke, 0f), Offset(halfStroke, size.height), strokeWidth = stroke)
+                        drawLine(outlineColor, Offset(size.width - halfStroke, 0f), Offset(size.width - halfStroke, size.height), strokeWidth = stroke)
                     }
-                }
+                    .padding(horizontal = 14.dp, vertical = 3.dp)
+            ) {
+                TrackItem(
+                    track = qTrack,
+                    isPlaying = idx == currentIndex,
+                    onClick = {
+                        viewModel.playTrackAt(idx)
+                    },
+                    onPlayNext = {
+                        viewModel.playNextInQueue(qTrack)
+                    },
+                    onAddToQueue = {
+                        viewModel.addToQueue(qTrack)
+                    },
+                    onRemoveFromQueue = {
+                        viewModel.removeFromQueue(idx)
+                    },
+                    onMoveUp = if (idx > 0) {
+                        { viewModel.moveQueueItem(idx, idx - 1) }
+                    } else null,
+                    onMoveDown = if (idx < queue.size - 1) {
+                        { viewModel.moveQueueItem(idx, idx + 1) }
+                    } else null,
+                    dragHandle = {
+                        Icon(
+                            imageVector = Icons.Default.DragHandle,
+                            contentDescription = "Reorder track",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .size(38.dp)
+                                .padding(6.dp)
+                                .pointerInput(qTrack.videoId, idx, queue.size) {
+                                    detectDragGestures(
+                                        onDragStart = { accumulatedY = 0f },
+                                        onDrag = { change, dragAmount ->
+                                            change.consume()
+                                            accumulatedY += dragAmount.y
+                                            if (accumulatedY > stepPx && idx < queue.size - 1) {
+                                                viewModel.moveQueueItem(idx, idx + 1)
+                                                accumulatedY = 0f
+                                            } else if (accumulatedY < -stepPx && idx > 0) {
+                                                viewModel.moveQueueItem(idx, idx - 1)
+                                                accumulatedY = 0f
+                                            }
+                                        },
+                                        onDragEnd = { accumulatedY = 0f },
+                                        onDragCancel = { accumulatedY = 0f }
+                                    )
+                                }
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
 
+        // 8. QUEUE FOOTER (Card Bottom Container matching v1.5.6 aesthetic)
+        item(key = "up_next_footer") {
+            val outlineColor = MaterialTheme.colorScheme.outlineVariant
+            val surfaceColor = MaterialTheme.colorScheme.surface
+            val hasFooterContent = playerState.isLoadingRadio || (currentIndex >= queue.size - 1)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
+                    .background(surfaceColor)
+                    .drawBehind {
+                        val stroke = 1.dp.toPx()
+                        val r = 20.dp.toPx()
+                        val halfStroke = stroke / 2f
+                        val path = Path().apply {
+                            moveTo(halfStroke, 0f)
+                            lineTo(halfStroke, size.height - r)
+                            arcTo(
+                                rect = Rect(halfStroke, size.height - 2 * r + halfStroke, 2 * r - halfStroke, size.height - halfStroke),
+                                startAngleDegrees = 180f,
+                                sweepAngleDegrees = -90f,
+                                forceMoveTo = false
+                            )
+                            lineTo(size.width - r, size.height - halfStroke)
+                            arcTo(
+                                rect = Rect(size.width - 2 * r + halfStroke, size.height - 2 * r + halfStroke, size.width - halfStroke, size.height - halfStroke),
+                                startAngleDegrees = 90f,
+                                sweepAngleDegrees = -90f,
+                                forceMoveTo = false
+                            )
+                            lineTo(size.width - halfStroke, 0f)
+                        }
+                        drawPath(path, color = outlineColor, style = Stroke(width = stroke))
+                    }
+                    .padding(start = 16.dp, end = 16.dp, top = if (hasFooterContent) 8.dp else 4.dp, bottom = 16.dp)
+            ) {
                 if (playerState.isLoadingRadio) {
                     Row(
                         modifier = Modifier
@@ -839,6 +925,8 @@ fun PlayerScreen(
                             Text("Load Similar Tracks 📻", style = MaterialTheme.typography.labelSmall)
                         }
                     }
+                } else {
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
             }
             Spacer(modifier = Modifier.height(48.dp))
