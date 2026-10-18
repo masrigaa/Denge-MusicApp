@@ -39,7 +39,7 @@ This document defines **what** Déngé is, **who** its target users are, and **w
 - **HD Album Art & Preview**: Crisp album artwork with an interactive HD preview dialog on tap.
 - **Quick Share**: One-tap share button inside the artwork preview that instantly copies the official track link to the clipboard.
 - **Playback Controls**: Play, Pause, Next, Previous, Shuffle, Repeat (Off, All, One), and an accurate scrub slider.
-- **Up Next & Radio Queue**: Full queue management with drag-to-reorder and automated radio recommendations based on current listening.
+- **Up Next & Radio Queue**: Full queue management with drag-to-reorder, virtualized lazy rendering for unlimited queue depth (>36 tracks), and automated radio recommendations based on current listening.
 
 ### 2.3 Library Screen
 - **Liked Songs**: One-tap local bookmarking with the heart (♥) button.

@@ -217,6 +217,17 @@ Used for: Lyrics, Equalizer, New Playlist
 | Max height     | 85% screen height                                            |
 | Scrim          | 40% black overlay                                            |
 
+### 3.10 Up Next / Radio Queue Container
+
+| Property       | Value                                                      |
+|----------------|------------------------------------------------------------|
+| Shape          | 20dp top and bottom radius (`radius-sheet` / `radius-card`)  |
+| Background     | `surface` (`#2B2321`)                                      |
+| Border         | 1dp `outline-variant` (`#5D4037`)                          |
+| Layout         | Virtualized `itemsIndexed` within seamless card boundaries |
+| Padding        | 16dp horizontal, 14dp inside items                         |
+| Touch Behavior | Independent click hit-testing past 36+ tracks with low RAM |
+
 ---
 
 ## 4. Layout & Spacing

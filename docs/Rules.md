@@ -59,6 +59,7 @@ Each Kotlin file should follow this order:
 | Modifier parameter           | Always first optional parameter, default `Modifier`        |
 | Remember                     | Use `remember` / `rememberSaveable` for expensive computations |
 | Stable/Immutable annotations | Use `@Stable` / `@Immutable` on state classes              |
+| List Virtualization          | Never wrap large/unbounded lists in a single `Column` inside scrollable containers. Use `items` / `itemsIndexed` directly to prevent Android HWUI layer bounds clipping (>8,192 px) |
 
 ---
 
