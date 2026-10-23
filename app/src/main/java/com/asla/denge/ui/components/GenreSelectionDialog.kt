@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -32,7 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,6 +45,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import com.asla.denge.domain.model.MusicGenre
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -61,6 +64,7 @@ fun GenreSelectionDialog(
     isFirstTimeOnboarding: Boolean = false,
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     var showAddCustomDialog by remember { mutableStateOf(false) }
     var customGenreName by remember { mutableStateOf("") }
     var customSearchQuery by remember { mutableStateOf("") }
@@ -69,10 +73,14 @@ fun GenreSelectionDialog(
 
     if (showAddCustomDialog) {
         AlertDialog(
-            onDismissRequest = { showAddCustomDialog = false },
+            onDismissRequest = {
+                showAddCustomDialog = false
+                customGenreName = ""
+                customSearchQuery = ""
+            },
             title = {
                 Text(
-                    text = "Add Custom Genre ✍️",
+                    text = "Add Custom Genre",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -81,27 +89,43 @@ fun GenreSelectionDialog(
             text = {
                 Column {
                     Text(
-                        text = "Enter a genre name, artist, or theme (e.g. Hololive, Ado, Synthwave, Lofi)",
+                        text = "Enter a genre, artist, or theme (e.g. Pop, Jazz, Acoustic, Lofi)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        text = "Genre Name",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                     OutlinedTextField(
                         value = customGenreName,
                         onValueChange = { customGenreName = it },
-                        label = { Text("Genre Name") },
-                        placeholder = { Text("e.g. Hololive / Ado") },
+                        placeholder = { Text("e.g. Indie Pop / Acoustic / Jazz") },
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                     )
                     Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Search Keywords (Optional)",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                     OutlinedTextField(
                         value = customSearchQuery,
                         onValueChange = { customSearchQuery = it },
-                        label = { Text("Search Keywords (Optional)") },
-                        placeholder = { Text("e.g. hololive original songs") },
+                        placeholder = { Text("e.g. acoustic guitar songs, indie mix") },
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                     )
@@ -115,12 +139,14 @@ fun GenreSelectionDialog(
                                 customGenreName.trim(),
                                 customSearchQuery.trim().ifBlank { customGenreName.trim() }
                             )
-                            Toast.makeText(context, "Genre '$customGenreName' added successfully! ✨", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Genre '${customGenreName.trim()}' added!", Toast.LENGTH_SHORT).show()
                             customGenreName = ""
                             customSearchQuery = ""
                             showAddCustomDialog = false
+                            focusManager.clearFocus()
                         }
                     },
+                    enabled = customGenreName.isNotBlank(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -131,11 +157,17 @@ fun GenreSelectionDialog(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddCustomDialog = false }) {
+                TextButton(onClick = {
+                    showAddCustomDialog = false
+                    customGenreName = ""
+                    customSearchQuery = ""
+                    focusManager.clearFocus()
+                }) {
                     Text("Cancel")
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(20.dp),
         )
     }
 
@@ -161,7 +193,7 @@ fun GenreSelectionDialog(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (isFirstTimeOnboarding) "Choose Favorite Genres 🎵" else "Manage Home Genres ⚙️",
+                        text = if (isFirstTimeOnboarding) "Choose Favorite Genres" else "Manage Home Genres",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -192,7 +224,6 @@ fun GenreSelectionDialog(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 item {
-                    // Add Custom Genre button
                     Button(
                         onClick = { showAddCustomDialog = true },
                         modifier = Modifier.fillMaxWidth(),
@@ -246,7 +277,7 @@ fun GenreSelectionDialog(
                                     )
                                     .clickable {
                                         if (!isSelected && selectedCount >= 5) {
-                                            Toast.makeText(context, "You can select up to 5 genres! 🎵", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "You can select up to 5 genres!", Toast.LENGTH_SHORT).show()
                                         } else {
                                             onToggleGenre(genre.id)
                                         }
@@ -257,11 +288,15 @@ fun GenreSelectionDialog(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.Center,
                                 ) {
-                                    Text(
-                                        text = genre.icon,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onPrimary,
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                    }
                                     Text(
                                         text = genre.name,
                                         style = MaterialTheme.typography.bodyMedium,
@@ -269,15 +304,6 @@ fun GenreSelectionDialog(
                                         color = if (isSelected) MaterialTheme.colorScheme.onPrimary
                                         else MaterialTheme.colorScheme.onSurface,
                                     )
-                                    if (isSelected) {
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Icon(
-                                            imageVector = Icons.Default.Check,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onPrimary,
-                                            modifier = Modifier.size(16.dp),
-                                        )
-                                    }
                                     if (genre.isCustom && onDeleteCustomGenre != null) {
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Icon(
@@ -300,7 +326,7 @@ fun GenreSelectionDialog(
             Button(
                 onClick = {
                     if (selectedCount == 0) {
-                        Toast.makeText(context, "Select at least 1 music genre! 🎵", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Select at least 1 music genre!", Toast.LENGTH_SHORT).show()
                     } else {
                         onConfirm()
                     }
@@ -311,7 +337,7 @@ fun GenreSelectionDialog(
                 ),
                 shape = RoundedCornerShape(12.dp),
             ) {
-                Text(if (isFirstTimeOnboarding) "Start Listening 🚀" else "Save Selection ✨")
+                Text(if (isFirstTimeOnboarding) "Start Listening" else "Save Selection")
             }
         },
         dismissButton = {

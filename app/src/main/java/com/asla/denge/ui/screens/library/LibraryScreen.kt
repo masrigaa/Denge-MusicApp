@@ -15,17 +15,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,10 +56,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.asla.denge.util.smoothScrollToTop
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,7 +68,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.asla.denge.R
 import com.asla.denge.domain.model.Playlist
-import com.asla.denge.domain.model.Track
 import com.asla.denge.ui.components.TrackItem
 import org.koin.androidx.compose.koinViewModel
 
@@ -69,15 +80,24 @@ fun LibraryScreen(
     val likedSongs by viewModel.likedSongs.collectAsState()
     val history by viewModel.history.collectAsState()
 
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState(initialPage = 0) { 3 }
     val tabs = listOf("Playlists", "Liked Songs", "History")
+
+    val coroutineScope = rememberCoroutineScope()
+    val playlistListState = rememberLazyListState()
+    val likedListState = rememberLazyListState()
+    val historyListState = rememberLazyListState()
+
+    val showPlaylistScrollToTop by remember { derivedStateOf { playlistListState.firstVisibleItemIndex > 1 } }
+    val showLikedScrollToTop by remember { derivedStateOf { likedListState.firstVisibleItemIndex > 1 } }
+    val showHistoryScrollToTop by remember { derivedStateOf { historyListState.firstVisibleItemIndex > 1 } }
 
     var showCreatePlaylistDialog by remember { mutableStateOf(false) }
     var newPlaylistName by remember { mutableStateOf("") }
 
     var selectedPlaylistForDetail by remember { mutableStateOf<Playlist?>(null) }
 
-    // Dialog Create Playlist
+    // Create Playlist Dialog
     if (showCreatePlaylistDialog) {
         AlertDialog(
             onDismissRequest = { showCreatePlaylistDialog = false },
@@ -134,7 +154,7 @@ fun LibraryScreen(
         )
     }
 
-    // Modal Detail Playlist Tracks
+    // Playlist Tracks Detail Dialog
     selectedPlaylistForDetail?.let { playlist ->
         val playlistTracks by viewModel.getPlaylistTracks(playlist.playlistId).collectAsState(initial = emptyList())
         AlertDialog(
@@ -260,26 +280,30 @@ fun LibraryScreen(
                     )
                     Spacer(modifier = Modifier.height(14.dp))
                     TabRow(
-                        selectedTabIndex = selectedTabIndex,
+                        selectedTabIndex = pagerState.currentPage,
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.primary,
                         indicator = { tabPositions ->
                             TabRowDefaults.SecondaryIndicator(
-                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
                                 color = MaterialTheme.colorScheme.primary,
                             )
                         }
                     ) {
                         tabs.forEachIndexed { index, title ->
                             Tab(
-                                selected = selectedTabIndex == index,
-                                onClick = { selectedTabIndex = index },
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
                                 text = {
                                     Text(
                                         text = title,
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.SemiBold,
-                                        color = if (selectedTabIndex == index) MaterialTheme.colorScheme.primary
+                                        fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.SemiBold,
+                                        color = if (pagerState.currentPage == index) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
@@ -289,148 +313,157 @@ fun LibraryScreen(
                 }
             }
 
-            // Tab Content
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-            ) {
-                when (selectedTabIndex) {
-                    0 -> {
-                        // Playlists tab
-                        if (playlists.isEmpty()) {
-                            EmptyStateView(
-                                icon = Icons.AutoMirrored.Filled.QueueMusic,
-                                title = "No Playlists Yet",
-                                description = "Create your first playlist using the + button below.",
-                            )
-                        } else {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                item { Spacer(modifier = Modifier.height(8.dp)) }
-                                itemsIndexed(playlists, key = { idx, item -> "pl_${item.playlistId}_$idx" }) { _, playlist ->
-                                    PlaylistItemView(
-                                        playlist = playlist,
-                                        onClick = { selectedPlaylistForDetail = playlist }
-                                    )
+            // Tab Content with HorizontalPager for ultra-smooth switching, swipe support & zero lag
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                beyondViewportPageCount = 1,
+            ) { page ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                ) {
+                    when (page) {
+                        0 -> {
+                            // Playlists tab
+                            if (playlists.isEmpty()) {
+                                EmptyStateView(
+                                    icon = Icons.AutoMirrored.Filled.QueueMusic,
+                                    title = "No Playlists Yet",
+                                    description = "Create your first playlist using the + button below.",
+                                )
+                            } else {
+                                LazyColumn(
+                                    state = playlistListState,
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    item { Spacer(modifier = Modifier.height(8.dp)) }
+                                    itemsIndexed(playlists, key = { _, item -> item.playlistId }) { _, playlist ->
+                                        PlaylistItemView(
+                                            playlist = playlist,
+                                            onClick = { selectedPlaylistForDetail = playlist }
+                                        )
+                                    }
+                                    item { Spacer(modifier = Modifier.height(88.dp)) }
                                 }
-                                item { Spacer(modifier = Modifier.height(88.dp)) }
                             }
                         }
-                    }
-                    1 -> {
-                        // Liked songs tab
-                        if (likedSongs.isEmpty()) {
-                            EmptyStateView(
-                                icon = Icons.Default.Favorite,
-                                title = "No Liked Songs Yet",
-                                description = "Tap the heart ❤️ button in the player to add your favorite songs here.",
-                            )
-                        } else {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                item {
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Text(
-                                            text = if (likedSongs.size == 1) "1 Liked Song" else "${likedSongs.size} Liked Songs",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary,
-                                        )
-                                        Button(
-                                            onClick = { viewModel.playTrack(likedSongs.first(), likedSongs) },
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.primary,
-                                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                            ),
-                                            shape = RoundedCornerShape(12.dp),
+                        1 -> {
+                            // Liked songs tab
+                            if (likedSongs.isEmpty()) {
+                                EmptyStateView(
+                                    icon = Icons.Default.Favorite,
+                                    title = "No Liked Songs Yet",
+                                    description = "Tap the heart ❤️ button in the player to add your favorite songs here.",
+                                )
+                            } else {
+                                LazyColumn(
+                                    state = likedListState,
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    item {
+                                        Spacer(modifier = Modifier.height(10.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            Icon(
-                                                imageVector = Icons.Default.PlayArrow,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp),
+                                            Text(
+                                                text = if (likedSongs.size == 1) "1 Liked Song" else "${likedSongs.size} Liked Songs",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary,
                                             )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Play All")
+                                            Button(
+                                                onClick = { viewModel.playTrack(likedSongs.first(), likedSongs) },
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                                                ),
+                                                shape = RoundedCornerShape(12.dp),
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.PlayArrow,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp),
+                                                )
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Text("Play All")
+                                            }
                                         }
+                                        Spacer(modifier = Modifier.height(2.dp))
                                     }
-                                    Spacer(modifier = Modifier.height(2.dp))
+                                    itemsIndexed(likedSongs, key = { _, item -> item.videoId }) { _, track ->
+                                        TrackItem(
+                                            track = track,
+                                            onClick = { viewModel.playTrack(track, likedSongs) },
+                                            onPlayNext = { viewModel.playNext(track) },
+                                            onAddToQueue = { viewModel.addToQueue(track) },
+                                        )
+                                    }
+                                    item { Spacer(modifier = Modifier.height(88.dp)) }
                                 }
-                                itemsIndexed(likedSongs, key = { idx, item -> "liked_${item.videoId}_$idx" }) { _, track ->
-                                    TrackItem(
-                                        track = track,
-                                        onClick = { viewModel.playTrack(track, likedSongs) },
-                                        onPlayNext = { viewModel.playNext(track) },
-                                        onAddToQueue = { viewModel.addToQueue(track) },
-                                    )
-                                }
-                                item { Spacer(modifier = Modifier.height(88.dp)) }
                             }
                         }
-                    }
-                    2 -> {
-                        // History tab - 100% safe from duplicate keys
-                        if (history.isEmpty()) {
-                            EmptyStateView(
-                                icon = Icons.Default.History,
-                                title = "No Listening History",
-                                description = "Songs you play will automatically appear here.",
-                            )
-                        } else {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                item {
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Text(
-                                            text = if (history.size == 1) "1 Recently Played Song" else "${history.size} Recently Played Songs",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary,
-                                        )
-                                        Button(
-                                            onClick = { viewModel.playTrack(history.first(), history) },
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.primary,
-                                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                            ),
-                                            shape = RoundedCornerShape(12.dp),
+                        2 -> {
+                            // History tab - 100% safe from duplicate keys
+                            if (history.isEmpty()) {
+                                EmptyStateView(
+                                    icon = Icons.Default.History,
+                                    title = "No Listening History",
+                                    description = "Songs you play will automatically appear here.",
+                                )
+                            } else {
+                                LazyColumn(
+                                    state = historyListState,
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    item {
+                                        Spacer(modifier = Modifier.height(10.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            Icon(
-                                                imageVector = Icons.Default.PlayArrow,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp),
+                                            Text(
+                                                text = if (history.size == 1) "1 Recently Played Song" else "${history.size} Recently Played Songs",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary,
                                             )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Play All")
+                                            Button(
+                                                onClick = { viewModel.playTrack(history.first(), history) },
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                                                ),
+                                                shape = RoundedCornerShape(12.dp),
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.PlayArrow,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp),
+                                                )
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Text("Play All")
+                                            }
                                         }
+                                        Spacer(modifier = Modifier.height(2.dp))
                                     }
-                                    Spacer(modifier = Modifier.height(2.dp))
+                                    itemsIndexed(history, key = { idx, item -> "lib_hist_${item.videoId}_$idx" }) { _, track ->
+                                        TrackItem(
+                                            track = track,
+                                            onClick = { viewModel.playTrack(track, history) },
+                                            onPlayNext = { viewModel.playNext(track) },
+                                            onAddToQueue = { viewModel.addToQueue(track) },
+                                        )
+                                    }
+                                    item { Spacer(modifier = Modifier.height(88.dp)) }
                                 }
-                                itemsIndexed(history, key = { idx, item -> "lib_hist_${item.videoId}_$idx" }) { _, track ->
-                                    TrackItem(
-                                        track = track,
-                                        onClick = { viewModel.playTrack(track, history) },
-                                        onPlayNext = { viewModel.playNext(track) },
-                                        onAddToQueue = { viewModel.addToQueue(track) },
-                                    )
-                                }
-                                item { Spacer(modifier = Modifier.height(88.dp)) }
                             }
                         }
                     }
@@ -438,8 +471,48 @@ fun LibraryScreen(
             }
         }
 
+        // Floating Scroll to Top Button (Shows when scrolled past top)
+        val isScrollToTopVisible = when (pagerState.currentPage) {
+            0 -> showPlaylistScrollToTop
+            1 -> showLikedScrollToTop
+            else -> showHistoryScrollToTop
+        }
+        androidx.compose.animation.AnimatedVisibility(
+            visible = isScrollToTopVisible,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(
+                    end = 20.dp,
+                    bottom = if (pagerState.currentPage == 0) 76.dp else 16.dp
+                )
+        ) {
+            FloatingActionButton(
+                onClick = {
+                    coroutineScope.launch {
+                        when (pagerState.currentPage) {
+                            0 -> playlistListState.smoothScrollToTop()
+                            1 -> likedListState.smoothScrollToTop()
+                            else -> historyListState.smoothScrollToTop()
+                        }
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape,
+                modifier = Modifier.size(46.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowUpward,
+                    contentDescription = "Scroll to top",
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
+
         // Floating button to create playlist when on tab 0 (Playlists) - perfectly placed right above navbar/miniplayer
-        if (selectedTabIndex == 0) {
+        if (pagerState.currentPage == 0) {
             FloatingActionButton(
                 onClick = {
                     newPlaylistName = ""

@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +21,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.key
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,7 +33,6 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,11 +49,6 @@ import com.asla.denge.ui.components.TrackItem
 import org.koin.androidx.compose.koinViewModel
 import java.util.Calendar
 
-import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -59,7 +56,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.sp
-import com.asla.denge.ui.components.GenreSelectionDialog
 
 @Composable
 fun HomeScreen(
@@ -74,37 +70,9 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadUserProfile()
-        viewModel.loadGenreFeed()
     }
 
     val greeting = rememberGreeting()
-
-    // 1. Onboarding Dialogs (Only shown on first launch after installation)
-    if (uiState.showOnboarding) {
-        when (uiState.onboardingStep) {
-            OnboardingStep.NAME_INPUT -> {
-                com.asla.denge.ui.components.NameInputDialog(
-                    initialName = "",
-                    onConfirm = { name ->
-                        viewModel.submitOnboardingName(name)
-                    },
-                    onSkip = {
-                        viewModel.submitOnboardingName("Music Lover")
-                    }
-                )
-            }
-            OnboardingStep.GENRE_SELECTION -> {
-                GenreSelectionDialog(
-                    genres = uiState.availableGenres,
-                    onToggleGenre = { viewModel.toggleGenreSelection(it) },
-                    onAddCustomGenre = { name, query -> viewModel.addCustomGenre(name, query) },
-                    onDismiss = { viewModel.completeOnboarding() },
-                    onConfirm = { viewModel.completeOnboarding() },
-                    isFirstTimeOnboarding = true,
-                )
-            }
-        }
-    }
 
     AnimatedContent(
         targetState = uiState.isLoading && uiState.genreSections.isEmpty(),
@@ -122,12 +90,19 @@ fun HomeScreen(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
             ) {
-        // Brew & Bean warm header with soft curve
+        // Brew & Bean warm header with soft curve & subtle gradient
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
+                        )
+                    )
+                )
                 .statusBarsPadding()
                 .padding(horizontal = 24.dp, vertical = 20.dp),
             contentAlignment = Alignment.CenterStart,
@@ -205,7 +180,9 @@ fun HomeScreen(
                     }
                 }
             } else {
+                val homeListState = rememberLazyListState()
                 LazyColumn(
+                    state = homeListState,
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
@@ -244,12 +221,14 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 history.take(3).forEach { track ->
-                                    TrackItem(
-                                        track = track,
-                                        onClick = { viewModel.playTrack(track, history) },
-                                        onPlayNext = { viewModel.playNext(track) },
-                                        onAddToQueue = { viewModel.addToQueue(track) },
-                                    )
+                                    key(track.videoId) {
+                                        TrackItem(
+                                            track = track,
+                                            onClick = { viewModel.playTrack(track, history) },
+                                            onPlayNext = { viewModel.playNext(track) },
+                                            onAddToQueue = { viewModel.addToQueue(track) },
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -327,12 +306,14 @@ fun HomeScreen(
 
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     mostPlayed.take(2).forEach { track ->
-                                        TrackItem(
-                                            track = track,
-                                            onClick = { viewModel.playTrack(track, mostPlayed) },
-                                            onPlayNext = { viewModel.playNext(track) },
-                                            onAddToQueue = { viewModel.addToQueue(track) },
-                                        )
+                                        key(track.videoId) {
+                                            TrackItem(
+                                                track = track,
+                                                onClick = { viewModel.playTrack(track, mostPlayed) },
+                                                onPlayNext = { viewModel.playNext(track) },
+                                                onAddToQueue = { viewModel.addToQueue(track) },
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -415,20 +396,22 @@ fun HomeScreen(
 
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     recTracks.take(4).forEach { track ->
-                                        TrackItem(
-                                            track = track,
-                                            onClick = { viewModel.playTrack(track, recTracks) },
-                                            onPlayNext = { viewModel.playNext(track) },
-                                            onAddToQueue = { viewModel.addToQueue(track) },
-                                        )
+                                        key(track.videoId) {
+                                            TrackItem(
+                                                track = track,
+                                                onClick = { viewModel.playTrack(track, recTracks) },
+                                                onPlayNext = { viewModel.playNext(track) },
+                                                onAddToQueue = { viewModel.addToQueue(track) },
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
 
-                    // 4. Genre sections (user-selected genres)
-                    itemsIndexed(uiState.genreSections, key = { idx, section -> "${section.id}_$idx" }) { _, section ->
+                    // 4. Genre sections (user-selected genres, virtualized & capped to 3 tracks for 60/120 FPS scrolling)
+                    items(uiState.genreSections, key = { it.id }) { section ->
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -500,12 +483,14 @@ fun HomeScreen(
 
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 section.tracks.forEach { track ->
-                                    TrackItem(
-                                        track = track,
-                                        onClick = { viewModel.playTrack(track, section.tracks) },
-                                        onPlayNext = { viewModel.playNext(track) },
-                                        onAddToQueue = { viewModel.addToQueue(track) },
-                                    )
+                                    key(track.videoId) {
+                                        TrackItem(
+                                            track = track,
+                                            onClick = { viewModel.playTrack(track, section.tracks) },
+                                            onPlayNext = { viewModel.playNext(track) },
+                                            onAddToQueue = { viewModel.addToQueue(track) },
+                                        )
+                                    }
                                 }
                             }
                         }

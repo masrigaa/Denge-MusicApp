@@ -12,9 +12,11 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
@@ -73,19 +75,40 @@ class InnertubeClient(
 
     /**
      * Search songs, artists, albums, and playlists.
-     * Combines official YouTube Music Songs shelf + YTM search + YouTube Web audio search
-     * to guarantee rich, comprehensive results (30-50+ tracks) for any artist or song.
+     * Combines official YouTube Music Songs shelf + YTM search + YouTube Web audio search +
+     * catalog expansion queries in parallel to guarantee rich, comprehensive results (up to 100 tracks),
+     * so even searching by artist name alone surfaces deep-catalog songs.
      */
-    suspend fun search(query: String): SearchResults {
-        val songsOnly = searchSongsOnly(query)
-        val ytmResults = searchYouTubeMusic(query)
-        val webResults = searchYouTubeWeb(query)
+    suspend fun search(query: String): SearchResults = coroutineScope {
+        val trimmed = query.trim()
+        val songsOnlyDeferred = async(Dispatchers.IO) { searchSongsOnly(trimmed) }
+        val ytmResultsDeferred = async(Dispatchers.IO) { searchYouTubeMusic(trimmed) }
+        val webResultsDeferred = async(Dispatchers.IO) { searchYouTubeWeb(trimmed) }
 
-        val allSongs = (songsOnly + ytmResults.songs + webResults.songs)
+        // Broaden search when query is an artist name or doesn't already specify "song"/"lagu"
+        val songsExtendedDeferred = async(Dispatchers.IO) {
+            val lower = trimmed.lowercase()
+            if (!lower.contains("song") && !lower.contains("lagu") && !lower.contains("music") && !lower.contains("audio")) {
+                searchSongsOnly("$trimmed songs")
+            } else {
+                emptyList()
+            }
+        }
+        val webExtendedDeferred = async(Dispatchers.IO) {
+            searchYouTubeWeb("$trimmed songs")
+        }
+
+        val songsOnly = songsOnlyDeferred.await()
+        val ytmResults = ytmResultsDeferred.await()
+        val webResults = webResultsDeferred.await()
+        val songsExtended = songsExtendedDeferred.await()
+        val webExtended = webExtendedDeferred.await()
+
+        val allSongs = (songsOnly + songsExtended + ytmResults.songs + webResults.songs + webExtended.songs)
             .distinctBy { it.videoId }
 
-        return ytmResults.copy(
-            songs = allSongs.take(50),
+        ytmResults.copy(
+            songs = allSongs.take(100),
             artists = ytmResults.artists.ifEmpty { webResults.artists },
             albums = ytmResults.albums.ifEmpty { webResults.albums },
             playlists = ytmResults.playlists.ifEmpty { webResults.playlists }
@@ -842,164 +865,6 @@ class InnertubeClient(
         }
     }
 
-    /**
-     * Fetch authentic user profile (name, email, avatar, handle) from YouTube Music / YouTube Innertube.
-     */
-    suspend fun fetchAccountProfile(cookie: String): GoogleUserProfile? {
-        val authHeader = generateSapisidHash(cookie) ?: return null
-        val requestBody = buildJsonObject {
-            put("context", buildWebRemixContext())
-        }
-
-        // 1. Try YouTube Music account_menu
-        try {
-            val responseText = httpClient.post("$YTM_BASE_URL/account/account_menu") {
-                contentType(ContentType.Application.Json)
-                header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                header("Referer", "https://music.youtube.com/")
-                header("Origin", "https://music.youtube.com")
-                header("X-Origin", "https://music.youtube.com")
-                header("X-Goog-AuthUser", "0")
-                header("Cookie", cookie)
-                header("Authorization", authHeader)
-                setBody(requestBody.toString())
-            }.bodyAsText()
-
-            val profile = parseAccountMenuResponse(responseText)
-            if (profile != null) return profile
-        } catch (_: Exception) {}
-
-        // 2. Try YouTube Web account_menu
-        try {
-            val webAuthHeader = generateSapisidHash(cookie, "https://www.youtube.com") ?: authHeader
-            val ytResponseText = httpClient.post("$YT_BASE_URL/account/account_menu") {
-                contentType(ContentType.Application.Json)
-                header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                header("Referer", "https://www.youtube.com/")
-                header("Origin", "https://www.youtube.com")
-                header("X-Origin", "https://www.youtube.com")
-                header("X-Goog-AuthUser", "0")
-                header("Cookie", cookie)
-                header("Authorization", webAuthHeader)
-                setBody(requestBody.toString())
-            }.bodyAsText()
-
-            val profile = parseAccountMenuResponse(ytResponseText)
-            if (profile != null) return profile
-        } catch (_: Exception) {}
-
-        // 3. Fallback: accounts_list
-        try {
-            val listResponseText = httpClient.post("$YTM_BASE_URL/account/accounts_list") {
-                contentType(ContentType.Application.Json)
-                header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                header("Referer", "https://music.youtube.com/")
-                header("Origin", "https://music.youtube.com")
-                header("X-Origin", "https://music.youtube.com")
-                header("X-Goog-AuthUser", "0")
-                header("Cookie", cookie)
-                header("Authorization", authHeader)
-                setBody(requestBody.toString())
-            }.bodyAsText()
-
-            val root = json.parseToJsonElement(listResponseText).jsonObject
-            val actions = root["actions"]?.jsonArray
-            actions?.forEach { action ->
-                val popup = action.jsonObject["openPopupAction"]?.jsonObject?.get("popup")?.jsonObject
-                val sections = popup?.get("multiPageMenuRenderer")?.jsonObject?.get("sections")?.jsonArray
-                sections?.forEach { section ->
-                    val items = section.jsonObject["accountSectionListRenderer"]?.jsonObject
-                        ?.get("contents")?.jsonArray
-                    items?.forEach { itm ->
-                        val renderer = itm.jsonObject["accountItemRenderer"]?.jsonObject
-                        if (renderer != null) {
-                            val accountName = renderer["accountName"]?.jsonObject?.get("runs")?.jsonArray
-                                ?.getOrNull(0)?.jsonObject?.get("text")?.jsonPrimitive?.contentOrNull
-                                ?: renderer["accountName"]?.jsonObject?.get("simpleText")?.jsonPrimitive?.contentOrNull
-                            val email = renderer["accountEmail"]?.jsonObject?.get("runs")?.jsonArray
-                                ?.getOrNull(0)?.jsonObject?.get("text")?.jsonPrimitive?.contentOrNull
-                                ?: renderer["accountEmail"]?.jsonObject?.get("simpleText")?.jsonPrimitive?.contentOrNull
-                            val avatar = renderer["accountPhoto"]?.jsonObject?.get("thumbnails")?.jsonArray
-                                ?.lastOrNull()?.jsonObject?.get("url")?.jsonPrimitive?.contentOrNull
-
-                            if (!accountName.isNullOrBlank() || !email.isNullOrBlank()) {
-                                return GoogleUserProfile(
-                                    email = email ?: accountName ?: "User",
-                                    name = accountName ?: email ?: "User",
-                                    handle = null,
-                                    avatarUrl = avatar,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (_: Exception) {}
-
-        return null
-    }
-
-    private fun parseAccountMenuResponse(responseText: String): GoogleUserProfile? {
-        return try {
-            val root = json.parseToJsonElement(responseText).jsonObject
-            val actions = root["actions"]?.jsonArray ?: return null
-            for (action in actions) {
-                val popup = action.jsonObject["openPopupAction"]?.jsonObject?.get("popup")?.jsonObject
-                val header = popup?.get("multiPageMenuRenderer")?.jsonObject?.get("header")?.jsonObject
-                val activeHeader = header?.get("activeAccountHeaderRenderer")?.jsonObject
-                    ?: header?.get("googleAccountHeaderRenderer")?.jsonObject
-
-                if (activeHeader != null) {
-                    val name = activeHeader["accountName"]?.jsonObject?.get("runs")?.jsonArray
-                        ?.getOrNull(0)?.jsonObject?.get("text")?.jsonPrimitive?.contentOrNull
-                        ?: activeHeader["accountName"]?.jsonObject?.get("simpleText")?.jsonPrimitive?.contentOrNull
-
-                    val email = activeHeader["email"]?.jsonObject?.get("runs")?.jsonArray
-                        ?.getOrNull(0)?.jsonObject?.get("text")?.jsonPrimitive?.contentOrNull
-                        ?: activeHeader["email"]?.jsonObject?.get("simpleText")?.jsonPrimitive?.contentOrNull
-
-                    val handle = activeHeader["channelHandle"]?.jsonObject?.get("runs")?.jsonArray
-                        ?.getOrNull(0)?.jsonObject?.get("text")?.jsonPrimitive?.contentOrNull
-                        ?: activeHeader["channelHandle"]?.jsonObject?.get("simpleText")?.jsonPrimitive?.contentOrNull
-
-                    val avatarUrl = activeHeader["avatar"]?.jsonObject?.get("thumbnails")?.jsonArray
-                        ?.lastOrNull()?.jsonObject?.get("url")?.jsonPrimitive?.contentOrNull
-
-                    if (!name.isNullOrBlank() || !email.isNullOrBlank() || !handle.isNullOrBlank()) {
-                        val finalEmail = email ?: handle ?: "Google Account"
-                        val candidateName = name?.trim()?.ifBlank { null }
-                        val finalName = if (!candidateName.isNullOrBlank() &&
-                            !candidateName.equals("Pengguna Google", ignoreCase = true) &&
-                            !candidateName.equals("Akun Google", ignoreCase = true) &&
-                            !candidateName.equals("Google Account", ignoreCase = true)
-                        ) {
-                            candidateName
-                        } else if (!handle.isNullOrBlank()) {
-                            handle.removePrefix("@").replace(".", " ")
-                                .split(" ")
-                                .joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
-                        } else {
-                            finalEmail.substringBefore("@")
-                                .replace(".", " ")
-                                .split(" ")
-                                .joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
-                        }
-
-                        return GoogleUserProfile(
-                            email = finalEmail,
-                            name = finalName,
-                            handle = handle,
-                            avatarUrl = avatarUrl,
-                        )
-                    }
-                }
-            }
-            null
-        } catch (_: Exception) {
-            null
-        }
-    }
-
     private fun extractCookieValue(cookie: String, key: String): String? {
         val regex = Regex("""(?i)(?:^|[;\s])${Regex.escape(key)}=([^;]+)""")
         return regex.find(cookie)?.groupValues?.getOrNull(1)?.trim()?.removeSurrounding("\"")?.ifBlank { null }
@@ -1026,11 +891,4 @@ class InnertubeClient(
         }
     }
 }
-
-data class GoogleUserProfile(
-    val email: String,
-    val name: String,
-    val handle: String? = null,
-    val avatarUrl: String? = null,
-)
 

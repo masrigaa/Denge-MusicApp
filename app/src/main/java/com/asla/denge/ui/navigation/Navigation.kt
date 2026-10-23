@@ -8,22 +8,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
@@ -35,24 +26,19 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -70,13 +56,16 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.asla.denge.R
 import com.asla.denge.ui.components.MiniPlayer
+import com.asla.denge.domain.repository.GenreRepository
 import com.asla.denge.ui.screens.home.HomeScreen
 import com.asla.denge.ui.screens.library.LibraryScreen
+import com.asla.denge.ui.screens.onboarding.OnboardingScreen
 import com.asla.denge.ui.screens.player.PlayerScreen
 import com.asla.denge.ui.screens.player.PlayerViewModel
 import com.asla.denge.ui.screens.search.SearchScreen
 import com.asla.denge.ui.screens.settings.SettingsScreen
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 /**
  * Route definitions for the app.
@@ -86,6 +75,7 @@ object Routes {
     const val SEARCH = "search"
     const val LIBRARY = "library"
     const val SETTINGS = "settings"
+    const val ONBOARDING = "onboarding"
     const val PLAYER = "player"
     const val QUEUE = "queue"
     const val AUTH = "auth"
@@ -139,9 +129,14 @@ fun AdsFreeNavHost(
     modifier: Modifier = Modifier,
     playerViewModel: PlayerViewModel = koinViewModel(),
 ) {
+    val genreRepository: GenreRepository = koinInject()
+    val hasCompletedOnboarding = remember { genreRepository.hasCompletedOnboarding() }
+    val startRoute = remember { if (hasCompletedOnboarding) Routes.HOME else Routes.ONBOARDING }
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val isOnboarding = currentDestination?.route == Routes.ONBOARDING
 
     var isPlayerExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -166,62 +161,64 @@ fun AdsFreeNavHost(
             containerColor = MaterialTheme.colorScheme.background,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
-                Column {
-                    MiniPlayer(
-                        playerViewModel = playerViewModel,
-                        onClick = { isPlayerExpanded = true },
-                    )
-                    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
-                    NavigationBar(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        tonalElevation = 0.dp,
-                        modifier = Modifier.drawBehind {
-                            val strokeWidth = 1.dp.toPx()
-                            drawLine(
-                                color = outlineVariant,
-                                start = Offset(0f, 0f),
-                                end = Offset(size.width, 0f),
-                                strokeWidth = strokeWidth
-                            )
-                        }
-                    ) {
-                        bottomNavItems.forEach { item ->
-                            val isSelected = currentDestination?.hierarchy?.any {
-                                it.route == item.route
-                            } == true
-                            NavigationBarItem(
-                                icon = {
-                                    Icon(
-                                        imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-                                        contentDescription = stringResource(item.labelResId),
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                },
-                                label = {
-                                    Text(
-                                        text = stringResource(item.labelResId),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                },
-                                selected = isSelected,
-                                onClick = {
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                                    indicatorColor = Color.Transparent,
-                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                if (!isOnboarding) {
+                    Column {
+                        MiniPlayer(
+                            playerViewModel = playerViewModel,
+                            onClick = { isPlayerExpanded = true },
+                        )
+                        val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+                        NavigationBar(
+                            containerColor = MaterialTheme.colorScheme.background,
+                            tonalElevation = 0.dp,
+                            modifier = Modifier.drawBehind {
+                                val strokeWidth = 1.dp.toPx()
+                                drawLine(
+                                    color = outlineVariant,
+                                    start = Offset(0f, 0f),
+                                    end = Offset(size.width, 0f),
+                                    strokeWidth = strokeWidth
                                 )
-                            )
+                            }
+                        ) {
+                            bottomNavItems.forEach { item ->
+                                val isSelected = currentDestination?.hierarchy?.any {
+                                    it.route == item.route
+                                } == true
+                                NavigationBarItem(
+                                    icon = {
+                                        Icon(
+                                            imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
+                                            contentDescription = stringResource(item.labelResId),
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    },
+                                    label = {
+                                        Text(
+                                            text = stringResource(item.labelResId),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    },
+                                    selected = isSelected,
+                                    onClick = {
+                                        navController.navigate(item.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    },
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                                        indicatorColor = Color.Transparent,
+                                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -229,13 +226,22 @@ fun AdsFreeNavHost(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = Routes.HOME,
-                modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
+                startDestination = startRoute,
+                modifier = Modifier.padding(bottom = if (isOnboarding) 0.dp else innerPadding.calculateBottomPadding()),
                 enterTransition = { fadeIn(animationSpec = tween(150, easing = LinearOutSlowInEasing)) },
                 exitTransition = { fadeOut(animationSpec = tween(150, easing = FastOutLinearInEasing)) },
                 popEnterTransition = { fadeIn(animationSpec = tween(150, easing = LinearOutSlowInEasing)) },
                 popExitTransition = { fadeOut(animationSpec = tween(150, easing = FastOutLinearInEasing)) },
             ) {
+                composable(Routes.ONBOARDING) {
+                    OnboardingScreen(
+                        onComplete = {
+                            navController.navigate(Routes.HOME) {
+                                popUpTo(Routes.ONBOARDING) { inclusive = true }
+                            }
+                        }
+                    )
+                }
                 composable(Routes.HOME) {
                     HomeScreen()
                 }

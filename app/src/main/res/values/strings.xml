@@ -7,12 +7,6 @@
     <string name="nav_library">Library</string>
     <string name="nav_settings">Settings</string>
 
-    <!-- Auth -->
-    <string name="auth_sign_in">Sign in with Google</string>
-    <string name="auth_sign_in_subtitle">Access your YouTube Music library</string>
-    <string name="auth_sign_out">Sign out</string>
-    <string name="auth_error">Sign in failed. Please try again.</string>
-
     <!-- Player -->
     <string name="player_play">Play</string>
     <string name="player_pause">Pause</string>

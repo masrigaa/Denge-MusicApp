@@ -61,17 +61,3 @@ data class SearchResults(
     val albums: List<Album> = emptyList(),
     val playlists: List<Playlist> = emptyList(),
 )
-
-/**
- * YouTube Music & Google user account model.
- */
-@kotlinx.serialization.Serializable
-data class UserAccount(
-    val email: String,
-    val displayName: String,
-    val channelName: String,
-    val handle: String,
-    val avatarUrl: String? = null,
-    val isActive: Boolean = false,
-    val cookie: String? = null,
-)

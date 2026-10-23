@@ -44,8 +44,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.asla.denge.R
 import com.asla.denge.ui.components.GenreSelectionDialog
@@ -86,7 +88,7 @@ fun SettingsScreen(
         )
     }
 
-    // Dialog Edit Profile Name
+    // Edit Profile Name Dialog
     if (showEditNameDialog) {
         AlertDialog(
             onDismissRequest = { showEditNameDialog = false },
@@ -183,7 +185,7 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 100.dp),
         ) {
-            // Profile Card (Google Account / Guest)
+            // Profile Card (Local Profile)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -272,7 +274,7 @@ fun SettingsScreen(
                 Column {
                     SettingsRow(
                         title = "Manage Home Genres",
-                        value = "${availableGenres.count { it.isSelected }} selected 🎵",
+                        value = "${availableGenres.count { it.isSelected }} selected",
                         onClick = { showGenreDialog = true },
                         isInteractive = true,
                     )
@@ -384,29 +386,48 @@ fun SettingsScreen(
     if (showEqDialog) {
         AlertDialog(
             onDismissRequest = { showEqDialog = false },
-            title = { Text(text = "Equalizer Presets", color = MaterialTheme.colorScheme.onSurface) },
+            title = {
+                Text(
+                    text = "Equalizer Presets",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
             text = {
-                LazyColumn {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(eqPresets, key = { it.id }) { preset ->
+                        val isSelected = preset.isActive == 1
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                                    else Color.Transparent
+                                )
                                 .clickable {
                                     viewModel.applyPreset(preset)
                                     showEqDialog = false
                                 }
-                                .padding(vertical = 12.dp, horizontal = 8.dp),
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(
-                                text = preset.name,
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.weight(1f),
-                                color = if (preset.isActive == 1) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurface,
-                            )
-                            if (preset.isActive == 1) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = preset.name,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = formatEqDetails(preset.name, preset.bandsJson),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            if (isSelected) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
@@ -674,3 +695,30 @@ private fun SettingsRow(
         }
     }
 }
+
+private fun formatEqDetails(name: String, bandsJson: String): String {
+    return when {
+        name.contains("Flat", true) -> "Neutral balanced studio response"
+        name.contains("Bass Booster", true) -> "Deep low-end sub-bass punch"
+        name.contains("Bass Reducer", true) -> "Attenuated low frequencies"
+        name.contains("Vocal Booster", true) -> "Clear speech & vocal prominence"
+        name.contains("Treble Booster", true) -> "Crisp, airy high frequencies"
+        name.contains("Treble Reducer", true) -> "Smooth highs roll-off"
+        name.contains("Rock", true) -> "Dynamic V-curve for guitar riffs"
+        name.contains("Pop", true) -> "Punchy midrange & vocal balance"
+        name.contains("Hip-Hop", true) -> "Heavy 60Hz kick & sharp highs"
+        name.contains("Electronic", true) -> "Club dynamics & synth bass punch"
+        name.contains("Classical", true) -> "Wide acoustic dynamic range"
+        name.contains("Jazz", true) -> "Warm low-mid & smooth highs"
+        name.contains("Acoustic", true) -> "Natural acoustic instrument timbre"
+        name.contains("Loudness", true) -> "Contour boost for quiet listening"
+        name.contains("Dance", true) -> "Rhythm section & groove boost"
+        name.contains("Deep", true) -> "Warm sub-bass resonance"
+        name.contains("Latin", true) -> "Crisp percussion & warm guitar"
+        name.contains("Piano", true) -> "Clear harmonic resonance"
+        name.contains("Spoken", true) -> "Optimized vocal clarity"
+        name.contains("Small Speakers", true) -> "Upper-bass boost for small phone speakers"
+        else -> "Custom acoustic calibration"
+    }
+}
+

@@ -47,7 +47,7 @@ class SearchViewModel(
 
     private var searchJob: Job? = null
 
-    fun onQueryChange(newQuery: String) {
+    fun onQueryChange(newQuery: String, saveToHistory: Boolean = true) {
         _uiState.update { it.copy(query = newQuery) }
 
         searchJob?.cancel()
@@ -57,12 +57,12 @@ class SearchViewModel(
         }
 
         searchJob = viewModelScope.launch {
-            delay(400L) // debounce
+            delay(350L) // debounce
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val results = musicRepository.search(newQuery)
                 _uiState.update { it.copy(isLoading = false, results = results) }
-                if (results.songs.isNotEmpty()) {
+                if (saveToHistory && results.songs.isNotEmpty()) {
                     recordSearch(newQuery)
                 }
             } catch (e: Exception) {

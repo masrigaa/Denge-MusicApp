@@ -19,9 +19,6 @@ import com.asla.denge.data.local.entity.PlaybackHistoryEntity
 import com.asla.denge.data.local.entity.PlaylistTrackEntity
 import com.asla.denge.data.local.entity.QueueItemEntity
 import com.asla.denge.data.local.entity.SearchHistoryEntity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 /**
  * Room database for AdsFreeMusic.

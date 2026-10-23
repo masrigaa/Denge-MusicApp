@@ -42,12 +42,15 @@ This document defines **what** Déngé is, **who** its target users are, and **w
 - **Up Next & Radio Queue**: Full queue management with drag-to-reorder, virtualized lazy rendering for unlimited queue depth (>36 tracks), and automated radio recommendations based on current listening.
 
 ### 2.3 Library Screen
+- **High-Performance Horizontal Pager**: Fluid tab switching across Playlists, Liked Songs, and History with pre-cached adjacent pages for 60/120 FPS transitions and horizontal swipe gestures.
 - **Liked Songs**: One-tap local bookmarking with the heart (♥) button.
 - **Custom Playlists**: Create, name, edit, and delete local playlists seamlessly.
-- **Listening History**: Chronological playback history log.
+- **Listening History**: Chronological playback history log with reactive updates.
+- **Fluid Scroll-to-Top**: Smooth single-flight physics scroll directly to the top.
 
 ### 2.4 Search Screen
 - **Debounced Live Search**: Rapid, responsive search across YouTube Music with instant track results.
+- **Genre & Mood Pills**: Tactile shortcut pills matching search typography with bounded touch ripple.
 - **Track Options Menu (⋮)**: Instant actions for "Play Now", "Play Next", "Add to Queue", and "View HD Artwork".
 
 ### 2.5 Settings Screen
@@ -87,3 +90,7 @@ This document defines **what** Déngé is, **who** its target users are, and **w
 - **Zero Server Footprint**: No user data is stored on remote servers.
 - **Privacy-First**: No access requested to contacts, camera, or personal files.
 - **Fair-Use & Educational**: Built as an alternative media client utilizing public client endpoints.
+
+---
+
+*Last updated: October 21, 2026 • Product Specification Version 2.0.17*

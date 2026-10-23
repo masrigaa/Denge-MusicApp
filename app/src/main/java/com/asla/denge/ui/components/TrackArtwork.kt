@@ -28,6 +28,14 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.asla.denge.util.toHdThumbnailUrl
 
+private val TrackArtworkFallbackGradient = Brush.linearGradient(
+    colors = listOf(
+        Color(0xFF4A3728), // Warm espresso
+        Color(0xFF7B5E43), // Rich caramel wood
+        Color(0xFF2E1C14), // Dark roast
+    )
+)
+
 /**
  * Universal Track Artwork component.
  * Guarantees that no track or video ever displays as an empty or blank box.
@@ -52,20 +60,10 @@ fun TrackArtwork(
         title.trim().take(1).uppercase().ifBlank { "♪" }
     }
 
-    val gradientBrush = remember {
-        Brush.linearGradient(
-            colors = listOf(
-                Color(0xFF4A3728), // Warm espresso
-                Color(0xFF7B5E43), // Rich caramel wood
-                Color(0xFF2E1C14), // Dark roast
-            )
-        )
-    }
-
     Box(
         modifier = modifier
             .clip(shape)
-            .background(gradientBrush)
+            .background(TrackArtworkFallbackGradient)
             .then(
                 if (showBorder) {
                     Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)

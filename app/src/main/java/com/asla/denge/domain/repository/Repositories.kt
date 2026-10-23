@@ -84,60 +84,23 @@ interface MusicRepository {
 }
 
 /**
- * Repository interface for authentication operations.
+ * Repository interface for local user profile and session management.
  */
 interface AuthRepository {
 
-    /** Check if user is currently authenticated. */
-    suspend fun isAuthenticated(): Boolean
-
-    /** Get stored auth token (or null if not authenticated). */
-    suspend fun getToken(): String?
-
-    /** Store auth token securely. */
-    suspend fun storeToken(token: String)
-
-    /** Flow of authentication state. */
-    fun getAuthState(): Flow<Boolean>
-
-    /** Clear auth state (sign out). */
-    suspend fun signOut()
-
-    /** Get user's Google email. */
-    suspend fun getUserEmail(): String?
-
-    /** Get user's Google display name. */
-    suspend fun getUserName(): String?
-
-    /** Set user's custom display name. */
     /** Check if user has explicitly set a custom display name. */
     fun hasCustomUserName(): Boolean
+
+    /** Get user's local display name. */
+    suspend fun getUserName(): String?
 
     /** Set user's custom display name. */
     suspend fun setUserName(name: String)
 
-    /** Get user's Google avatar photo URL. */
-    suspend fun getUserAvatar(): String?
-
-    /** Get YouTube Music session cookie. */
+    /** Get optional streaming session cookie. */
     suspend fun getAuthCookie(): String?
 
-    /** Store user Google account profile and optional cookie. */
-    suspend fun storeUser(email: String, name: String, avatar: String? = null, cookie: String? = null)
-
-    /** Stream of all saved/discovered Google accounts on device. */
-    fun getSavedAccounts(): Flow<List<com.asla.denge.domain.model.UserAccount>>
-
-    /** Switch the active user session to a specific account by email. */
-    suspend fun switchAccount(email: String)
-
-    /** Save or update a Google account. */
-    suspend fun saveAccount(account: com.asla.denge.domain.model.UserAccount)
-
-    /** Query Android AccountManager to populate device Google accounts. */
-    suspend fun refreshDeviceAccounts()
-
-    /** Fetch real Google/YouTube account details (name, email, avatar) using session cookie. */
-    suspend fun fetchAndSyncYouTubeAccount(cookie: String): com.asla.denge.domain.model.UserAccount?
+    /** Reset or clear local profile state. */
+    suspend fun signOut()
 }
 

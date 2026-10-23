@@ -70,7 +70,7 @@ val databaseModule = module {
     single { get<AdsFreeDatabase>().eqPresetDao() }
 
     single<AuthRepository> {
-        AuthRepositoryImpl(context = androidContext(), innertubeClient = get())
+        AuthRepositoryImpl(context = androidContext())
     }
 
     single<GenreRepository> {

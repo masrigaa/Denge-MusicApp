@@ -14,8 +14,8 @@ android {
         applicationId = "com.asla.denge"
         minSdk = 31
         targetSdk = 36
-        versionCode = 162
-        versionName = "1.6.2"
+        versionCode = 217
+        versionName = "2.0.17-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,6 +46,12 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    packaging {
+        dex {
+            useLegacyPackaging = true
+        }
     }
 
     ksp {
@@ -114,12 +120,6 @@ dependencies {
     // ── Image Loading (Coil) ──
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
-
-    // ── Google Auth ──
-    implementation("androidx.credentials:credentials:1.5.0-rc01")
-    implementation("androidx.credentials:credentials-play-services-auth:1.5.0-rc01")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
-
 
     // ── Testing ──
     testImplementation("junit:junit:4.13.2")

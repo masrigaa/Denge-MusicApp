@@ -78,8 +78,11 @@
 - **🔗 HD Artwork Preview & Quick Share**  
   Tap the album art in the Now Playing screen to inspect HD cover artwork, and tap **Share** to copy the track link directly to your clipboard in a single tap.
 
-- **🎚️ Audio Equalizer & Custom Genre Curation**  
-  Built-in audio equalizer with versatile presets (Bass Boost, Vocal, Rock, Flat) alongside customizable Home genre tabs tailored to your taste.
+- **⚡ High-Performance UI & Zero-Lag Library Tabs**  
+  Fluid `HorizontalPager` with pre-cached adjacent pages ensuring instant 60/120 FPS tab transitions and horizontal swipe gestures across Playlists, Liked Songs, and History.
+
+- **🚀 Continuous Single-Flight Scroll-to-Top**  
+  Native frame-driven physics scrolling that glides smoothly from deep lists directly to the top without mid-flight stutters or abrupt jumps.
 
 ---
 
@@ -103,8 +106,8 @@
 
 | Specification | Minimum | Recommended |
 |:---|:---:|:---:|
-| **Operating System** | Android 12 (API 31) | Android 13, 14, 15+ |
-| **App Size** | ~35 MB | ~35 MB |
+| **Operating System** | Android 12 (API 31) | Android 13, 14, 15, 16+ |
+| **App Size** | ~25 MB | ~25 MB |
 | **RAM** | 2 GB | 3 GB or more |
 | **Network** | Wi-Fi / Cellular (3G/4G/5G) | Stable connection |
 | **Permissions** | Internet, Media Notification | No contacts/camera needed |
@@ -134,5 +137,5 @@ Explore technical architecture, design guidelines, and contribution rules in the
 ---
 
 <p align="center">
-  Crafted with ☕ by <b>Asla</b>
+  Crafted with ☕ by <b>Asla</b> &nbsp;•&nbsp; <i>Version 2.0.17-beta &nbsp;•&nbsp; Last Updated: October 23, 2026</i>
 </p>

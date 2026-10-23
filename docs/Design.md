@@ -337,4 +337,4 @@ All scrollable content must clear `nav height (90dp) + mini player (64dp) + gap 
 
 ---
 
-*Last updated: 2026-09-24*
+*Last updated: October 21, 2026 • Design Specification Version 2.0.17*

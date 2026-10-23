@@ -9,7 +9,6 @@ import com.asla.denge.player.PlayerManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,16 +29,9 @@ data class GenreSection(
     val tracks: List<Track>,
 )
 
-enum class OnboardingStep {
-    NAME_INPUT,
-    GENRE_SELECTION,
-}
-
 data class HomeUiState(
     val isLoading: Boolean = true,
     val genreSections: List<GenreSection> = emptyList(),
-    val showOnboarding: Boolean = false,
-    val onboardingStep: OnboardingStep = OnboardingStep.NAME_INPUT,
     val availableGenres: List<MusicGenre> = emptyList(),
     val error: String? = null,
 )
@@ -51,13 +43,9 @@ class HomeViewModel(
     private val genreRepository: GenreRepository,
 ) : ViewModel() {
 
-    private val isFirstLaunch = !genreRepository.hasCompletedOnboarding()
-
     private val _uiState = MutableStateFlow(
         HomeUiState(
-            isLoading = !isFirstLaunch,
-            showOnboarding = isFirstLaunch,
-            onboardingStep = if (authRepository.hasCustomUserName()) OnboardingStep.GENRE_SELECTION else OnboardingStep.NAME_INPUT,
+            isLoading = true,
             availableGenres = genreRepository.getAllGenres(),
         )
     )
@@ -179,21 +167,6 @@ class HomeViewModel(
             authRepository.setUserName(cleanName)
             _userName.value = cleanName
         }
-    }
-
-    fun submitOnboardingName(name: String) {
-        val cleanName = name.trim().ifBlank { "Sobat Musik" }
-        viewModelScope.launch {
-            authRepository.setUserName(cleanName)
-            _userName.value = cleanName
-            _uiState.update { it.copy(onboardingStep = OnboardingStep.GENRE_SELECTION) }
-        }
-    }
-
-    fun completeOnboarding() {
-        genreRepository.setCompletedOnboarding(true)
-        _uiState.update { it.copy(showOnboarding = false) }
-        loadGenreFeed()
     }
 
     fun playTrack(track: Track, queue: List<Track> = listOf(track)) {
