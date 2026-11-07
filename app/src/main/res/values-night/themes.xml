@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Warm Charcoal Canvas for Dark Theme (Arang hangat) -->
+    <color name="dark_canvas">#161514</color>
+
+    <style name="Theme.AdsFreeMusic" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/dark_canvas</item>
+        <item name="android:windowSplashScreenBackground">@color/dark_canvas</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -142,19 +143,21 @@ fun AdsFreeNavHost(
 
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
+    val isDarkTheme = colorScheme.background.luminance() < 0.5f
 
-    DisposableEffect(isPlayerExpanded) {
+    DisposableEffect(isPlayerExpanded, isDarkTheme) {
         val window = (context as? android.app.Activity ?: (context as? android.content.ContextWrapper)?.baseContext as? android.app.Activity)?.window
         if (window != null) {
             window.statusBarColor = android.graphics.Color.TRANSPARENT
             window.navigationBarColor = colorScheme.background.toArgb()
             androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
-                isAppearanceLightStatusBars = true
-                isAppearanceLightNavigationBars = true
+                isAppearanceLightStatusBars = !isDarkTheme
+                isAppearanceLightNavigationBars = !isDarkTheme
             }
         }
         onDispose { }
     }
+
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
@@ -257,6 +260,11 @@ fun AdsFreeNavHost(
             }
         }
 
+        // Handle system back gesture: Close Now Playing player first before navigating destinations
+        androidx.activity.compose.BackHandler(enabled = isPlayerExpanded) {
+            isPlayerExpanded = false
+        }
+
         // Full Player Modal / Overlay
         AnimatedVisibility(
             visible = isPlayerExpanded,
@@ -270,3 +278,4 @@ fun AdsFreeNavHost(
         }
     }
 }
+

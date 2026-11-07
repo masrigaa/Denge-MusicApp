@@ -252,13 +252,21 @@ class MusicRepositoryImpl(
         return tracks
     }
 
+    private val genreTracksCache = java.util.concurrent.ConcurrentHashMap<String, List<Track>>()
+
     override suspend fun getGenreTracks(genre: String): List<Track> {
+        genreTracksCache[genre]?.let { cached ->
+            if (cached.isNotEmpty()) return cached
+        }
         return try {
-            val results = innertubeClient.search(genre).songs.filter { isMusicTrack(it) && !isInstrumental(it.title) }
+            val results = innertubeClient.searchSongsOnly(genre)
+                .filter { isMusicTrack(it) && !isInstrumental(it.title) }
+                .take(5)
             if (results.isNotEmpty()) {
                 trackDao.upsertAll(results.map { it.toEntity() })
+                genreTracksCache[genre] = results
             }
-            results.take(5)
+            results
         } catch (_: Exception) {
             emptyList()
         }

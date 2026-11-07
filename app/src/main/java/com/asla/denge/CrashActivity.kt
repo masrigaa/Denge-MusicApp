@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// Intentionally theme-independent: Emergency crash reporting activity runs outside normal app themes to avoid cascading theme crashes
 class CrashActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,8 +31,9 @@ class CrashActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = Color(0xFF1E1715)
+                    color = Color(0xFF1E1715) // Theme-independent dark error canvas
                 ) {
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -80,7 +82,7 @@ class CrashActivity : ComponentActivity() {
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF704214))
                             ) {
-                                Text("Copy Report 📋", color = Color.White)
+                                Text("Copy Report", color = Color.White)
                             }
 
                             Button(
@@ -94,7 +96,7 @@ class CrashActivity : ComponentActivity() {
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8D6E63))
                             ) {
-                                Text("Restart App 🔄", color = Color.White)
+                                Text("Restart App", color = Color.White)
                             }
                         }
                     }

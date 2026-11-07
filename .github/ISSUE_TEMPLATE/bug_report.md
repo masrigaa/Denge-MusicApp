@@ -14,7 +14,7 @@ A clear and concise description of what the bug is.
 
 - **Android Version**: [e.g. Android 13, 14, 15]
 - **Device Model**: [e.g. Samsung Galaxy S23, Google Pixel 8]
-- **App Version**: [e.g. v1.6.2 (versionCode 162)]
+- **App Version**: [e.g. v2.1.7 (versionCode 225)]
 
 ## Steps to Reproduce (Required)
 

@@ -57,20 +57,49 @@ graph TD
 
 A warm, premium coffee-house aesthetic crafted with curated mocha, latte, and cream tones:
 
-### 2.1 Color Palette
+### 2.1 Color Palette & Theme System
 
-| Token               | Hex Code        | Role / Usage                                |
-|----------------------|-----------------|---------------------------------------------|
-| `primary`            | `#8D6E63`       | Warm Medium Roast — Buttons, active sliders |
-| `on-primary`         | `#FFFFFF`       | Text/icons on primary surfaces               |
-| `primary-container`  | `#D7CCC8`       | Light roast badge & accent containers        |
-| `surface`            | `#2B2321`       | Deep Espresso dark surface                  |
-| `surface-variant`    | `#3E322E`       | Warm Mocha headers & elevated card containers|
-| `background`         | `#1E1816`       | Dark Coffee Bean ambient background          |
-| `on-surface`         | `#F5EBE6`       | Creamy Latte white primary text             |
-| `on-surface-variant` | `#BCAAA4`       | Hazelnut secondary / subtitle text          |
-| `outline-variant`    | `#5D4037`       | Subtle card & divider borders               |
-| `accent-gold`        | `#D4AF37`       | Highlights & active badges                  |
+Déngé implements a dual-palette design system with **Brew & Bean** (Light) and **Warm Charcoal** (Dark, warm charcoal without harsh OLED blacking).
+
+#### Token Reference Table
+
+| Role | Code Token | Light (Brew & Bean) | Dark (Warm Charcoal) | Usage |
+|:---|:---|:---:|:---:|:---|
+| **Canvas** | `canvas` | `#F7F2EB` (`CoffeeCanvas`) | `#161514` | Main page background & scaffold |
+| **Surface** | `surface` | `#FFFFFF` (`CoffeeSurface`) | `#1F1D1B` | Card surfaces, dialogs, and modal sheets |
+| **Card** | `card` | `#F5ECE2` (`CoffeeCard`) | `#282522` | Track item containers, shelves, & chips |
+| **Surface Muted** | `surfaceMuted` | `#EADCCF` (`CoffeeSurfaceMuted`) | `#34302C` | Inactive pill backgrounds & badges |
+| **Header** | `header` | `#3E2A1E` (`CoffeeHeader`) | `#3E2A1E` | Contrast banner or dark header |
+| **Header Warm** | `headerWarm` | `#F0E5D8` (`CoffeeHeaderWarm`) | `#2E2A26` | Light warm header accents |
+| **Primary** | `primary` | `#3E2A1E` (`EspressoBrown`) | `#A88569` (`TanAccent`) | Primary action buttons, play FAB, active slider |
+| **On Primary** | `onPrimary` | `#F4EBE1` (`OnEspresso`) | `#2C1A10` (`TextEspresso`) | Text/icons on primary action buttons |
+| **Secondary** | `secondary` | `#73513C` (`CaramelBrown`) | `#C19A78` | Secondary accents & secondary slider tracks |
+| **Accent** | `accent` | `#A88569` (`TanAccent`) | `#A88569` | Highlight borders & selected chips |
+| **Highlight** | `highlight` | `#D49B55` (`GoldenCaramel`) | `#D49B55` | Rating stars & special indicators |
+| **Text** | `text` | `#2C1A10` (`TextEspresso`) | `#F4EBE1` (`OnEspresso`) | Track titles, headings, and high-contrast text |
+| **Text Muted** | `textMuted` | `#7E6958` (`TextMuted`) | `#B3A99E` | Artist names, durations, and subtitles |
+| **Text Placeholder** | `textPlaceholder` | `#A8988B` (`TextPlaceholder`) | `#857B72` | Input placeholders & disabled text |
+| **Border** | `border` | `#E0D2C3` (`CoffeeBorder`) | `#3A3632` | Card outlines & component borders |
+| **Border Subtle** | `borderSubtle` | `#EFE6DC` (`CoffeeBorderSubtle`) | `#2E2B28` | Subtle row dividers |
+| **Danger** | `danger` | `#B84A32` (`CoffeeDanger`) | `#E57C63` | Error notices, delete playlist/cache |
+| **Danger Bg** | `dangerBg` | `#FBECE9` (`CoffeeDangerBg`) | `#3A2521` | Error/cancel container background |
+| **Success** | `success` | `#388E3C` (`CoffeeSuccess`) | `#81C784` | Success indicator / added to queue |
+| **Success Bg** | `successBg` | `#E8F5E9` (`CoffeeSuccessBg`) | `#1F3322` | Success status container background |
+
+#### Color Design Rules & Guidelines
+
+1. **Strictly avoid hardcoding `Color(0x...)` in UI screens**:
+   - Always use `MaterialTheme.colorScheme.<role>` or `LocalDengeColors.current.<role>`.
+   - The only exception is for physical simulation elements (such as vinyl record sleeves in `TrackArtwork`) with an explanatory comment.
+2. **Adding New Color Tokens**:
+   - Open `com.asla.denge.ui.theme.Color.kt`.
+   - Add new properties to the `DengeColors` data class.
+   - Provide corresponding values in both `LightDengeColors` and `DarkDengeColors`.
+   - Map to `MaterialTheme` in `Theme.kt` where relevant to Material 3 tokens.
+3. **Theme Selection Architecture**:
+   - Theme preferences (`SYSTEM`, `LIGHT`, `DARK`) are stored in `DataStore Preferences` (`settingsDataStore`).
+   - Emitted reactively via Kotlin Flow from `SettingsRepository` -> `MainActivity`, providing instantaneous transitions without restarting the Activity.
+
 
 ### 2.2 Typography
 
@@ -217,16 +246,18 @@ Used for: Lyrics, Equalizer, New Playlist
 | Max height     | 85% screen height                                            |
 | Scrim          | 40% black overlay                                            |
 
-### 3.10 Up Next / Radio Queue Container
+### 3.10 Up Next / Antrean Lagu Modal Bottom Sheet
 
 | Property       | Value                                                      |
 |----------------|------------------------------------------------------------|
-| Shape          | 20dp top and bottom radius (`radius-sheet` / `radius-card`)  |
-| Background     | `surface` (`#2B2321`)                                      |
-| Border         | 1dp `outline-variant` (`#5D4037`)                          |
-| Layout         | Virtualized `itemsIndexed` within seamless card boundaries |
-| Padding        | 16dp horizontal, 14dp inside items                         |
-| Touch Behavior | Independent click hit-testing past 36+ tracks with low RAM |
+| Container      | `ModalBottomSheet` dengan drag handle                     |
+| Shape          | 28dp top radius (`radius-sheet`)                           |
+| Background     | `MaterialTheme.colorScheme.surface`                        |
+| Border / Div   | `MaterialTheme.colorScheme.outlineVariant`                 |
+| Trigger        | Tombol kapsul `[ ☰ Antrean ]` di bottom bar Now Playing   |
+| Layout         | Virtualized `LazyColumn` dengan `itemsIndexed` & auto-scroll ke lagu aktif |
+| Back Gesture   | `BackHandler` otomatis menutup sheet terlebih dahulu       |
+
 
 ---
 
@@ -337,4 +368,4 @@ All scrollable content must clear `nav height (90dp) + mini player (64dp) + gap 
 
 ---
 
-*Last updated: October 21, 2026 • Design Specification Version 2.0.17*
+*Last updated: November 2026 • Design Specification Version 2.1.7*

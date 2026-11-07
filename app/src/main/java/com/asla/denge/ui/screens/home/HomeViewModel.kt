@@ -51,7 +51,7 @@ class HomeViewModel(
     )
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    private val _userName = MutableStateFlow("Sobat Musik")
+    private val _userName = MutableStateFlow("Music Lover")
     val userName: StateFlow<String> = _userName.asStateFlow()
 
     val recentHistory: StateFlow<List<Track>> = musicRepository.getPlaybackHistory()
@@ -91,7 +91,7 @@ class HomeViewModel(
 
     fun loadUserProfile() {
         viewModelScope.launch {
-            val name = authRepository.getUserName() ?: "Sobat Musik"
+            val name = authRepository.getUserName() ?: "Music Lover"
             _userName.value = name
         }
     }
@@ -162,7 +162,7 @@ class HomeViewModel(
 
 
     fun setUserName(name: String) {
-        val cleanName = name.trim().ifBlank { "Sobat Musik" }
+        val cleanName = name.trim().ifBlank { "Music Lover" }
         viewModelScope.launch {
             authRepository.setUserName(cleanName)
             _userName.value = cleanName

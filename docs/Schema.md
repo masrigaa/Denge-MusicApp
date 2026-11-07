@@ -287,4 +287,4 @@ erDiagram
 
 ---
 
-*Last updated: October 21, 2026 • Database Schema Specification Version 2.0.17*
+*Last updated: November 2026 • Database Schema Specification Version 2.1.7*

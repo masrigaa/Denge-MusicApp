@@ -30,28 +30,55 @@
 
 ## 📸 Screenshots Showcase
 
+### 🌟 Core Experience & Navigation (8 Screens)
 <p align="center">
-  <img src="docs/screenshots/home_screen.jpg" width="46%" alt="Personalized Home" />
-  &nbsp;&nbsp;
-  <img src="docs/screenshots/now_playing.jpg" width="46%" alt="Now Playing Screen" />
+  <img src="./docs/screenshots/01_get_started.jpg" width="23%" alt="Get Started / Onboarding" />
+  &nbsp;
+  <img src="./docs/screenshots/02_home.jpg" width="23%" alt="Home Screen" />
+  &nbsp;
+  <img src="./docs/screenshots/03_search.jpg" width="23%" alt="Search Screen" />
+  &nbsp;
+  <img src="./docs/screenshots/04_library.jpg" width="23%" alt="Library Screen" />
 </p>
 <p align="center">
-  <sub><i>Personalized Home & Recommendations &nbsp;•&nbsp; Now Playing Screen & Radio Queue</i></sub>
+  <sub><i>1. Get Started &nbsp;•&nbsp; 2. Home Feed &nbsp;•&nbsp; 3. Search & Genres &nbsp;•&nbsp; 4. Library & Liked</i></sub>
 </p>
 
 <br />
 
 <p align="center">
-  <img src="docs/screenshots/artwork_1.jpg" width="23%" alt="HD Artwork Preview 1" />
+  <img src="./docs/screenshots/05_settings.jpg" width="23%" alt="Settings Screen" />
   &nbsp;
-  <img src="docs/screenshots/artwork_2.jpg" width="23%" alt="HD Artwork Preview 2" />
+  <img src="./docs/screenshots/06_now_playing_1.jpg" width="23%" alt="Now Playing (Light Theme)" />
   &nbsp;
-  <img src="docs/screenshots/artwork_3.jpg" width="23%" alt="HD Artwork Preview 3" />
+  <img src="./docs/screenshots/07_now_playing_2.jpg" width="23%" alt="Now Playing (Dark Theme)" />
   &nbsp;
-  <img src="docs/screenshots/artwork_4.jpg" width="23%" alt="HD Artwork Preview 4" />
+  <img src="./docs/screenshots/08_queue.jpg" width="23%" alt="Queue Bottom Sheet" />
 </p>
 <p align="center">
-  <sub><i>High-Resolution Artwork Preview Modal & Quick Share Link Button</i></sub>
+  <sub><i>5. Settings &nbsp;•&nbsp; 6. Now Playing 1 (Light) &nbsp;•&nbsp; 7. Now Playing 2 (Dark) &nbsp;•&nbsp; 8. Queue Sheet</i></sub>
+</p>
+
+<br />
+
+### 🎨 HD Artwork Preview Modal (6 Styles)
+<p align="center">
+  <img src="./docs/screenshots/artwork_01.jpg" width="31%" alt="Artwork Preview 1 - DYNA MIND" />
+  &nbsp;
+  <img src="./docs/screenshots/artwork_02.jpg" width="31%" alt="Artwork Preview 2 - BALALAIKA" />
+  &nbsp;
+  <img src="./docs/screenshots/artwork_03.jpg" width="31%" alt="Artwork Preview 3 - Rokudenashi" />
+</p>
+<br />
+<p align="center">
+  <img src="./docs/screenshots/artwork_04.jpg" width="31%" alt="Artwork Preview 4 - Ado Vivarium" />
+  &nbsp;
+  <img src="./docs/screenshots/artwork_05.jpg" width="31%" alt="Artwork Preview 5 - Samuel Kim" />
+  &nbsp;
+  <img src="./docs/screenshots/artwork_06.jpg" width="31%" alt="Artwork Preview 6 - Sunflower" />
+</p>
+<p align="center">
+  <sub><i>Full-cover HD artwork modal with one-tap inspection and quick share</i></sub>
 </p>
 
 ---
@@ -64,8 +91,12 @@
 - **🎧 True Background Playback**  
   Playback stays smooth and uninterrupted with the screen locked or while multitasking across other apps. Fully integrated with system media notifications, lock screen controls, and dynamic status bars.
 
-- **☕ Warm "Brew & Bean" Theme**  
-  An aesthetic coffee palette (Espresso, Warm Mocha, Hazelnut, and Creamy Latte) with an immersive edge-to-edge layout that is easy on the eyes.
+- **☕ Dual Theme Engine (Brew & Bean & Warm Charcoal)**  
+  Seamlessly switch between **Light (Brew & Bean)** warm latte aesthetic and **Dark (Warm Charcoal)** deep roasted ambiance with automatic system theme synchronization.
+
+- **⏱️ Smart Sleep Timer & Interactive Queue**  
+  - **Fluid Queue Management**: Drag handle (`≡`) to reorder upcoming tracks and swipe-to-dismiss to quickly remove tracks from the queue.
+  - **Granular Sleep Timer**: Set custom duration from 5 to 120 minutes with a single slider, or toggle **"End of track"** mode to finish your current song before pausing.
 
 - **🔒 Zero-Backend & Complete Privacy**  
   Runs entirely on your device. No Google account login required, no intermediary servers or tracking databases. Customize your listener profile name locally anytime.
@@ -137,5 +168,6 @@ Explore technical architecture, design guidelines, and contribution rules in the
 ---
 
 <p align="center">
-  Crafted with ☕ by <b>Asla</b> &nbsp;•&nbsp; <i>Version 2.0.17-beta &nbsp;•&nbsp; Last Updated: October 23, 2026</i>
+  Crafted with ☕ by <b>Asla</b> &nbsp;•&nbsp; <i>Version 2.1.7 &nbsp;•&nbsp; Last Updated: November 2026</i>
 </p>
+

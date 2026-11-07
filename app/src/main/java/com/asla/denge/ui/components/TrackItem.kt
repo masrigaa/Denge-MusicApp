@@ -122,7 +122,7 @@ fun TrackItem(
                                 onClick = {
                                     showPreviewDialog = false
                                     onPlayNext()
-                                    Toast.makeText(context, "${track.title} will play next ⏭️", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "${track.title} will play next", Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(10.dp),
@@ -135,7 +135,7 @@ fun TrackItem(
                                 onClick = {
                                     showPreviewDialog = false
                                     onAddToQueue()
-                                    Toast.makeText(context, "${track.title} added to queue 📑", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "${track.title} added to queue", Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(10.dp),
@@ -283,7 +283,7 @@ fun TrackItem(
                         onClick = {
                             showMenu = false
                             onPlayNext()
-                            Toast.makeText(context, "${track.title} will play next ⏭️", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "${track.title} will play next", Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
@@ -302,7 +302,7 @@ fun TrackItem(
                         onClick = {
                             showMenu = false
                             onAddToQueue()
-                            Toast.makeText(context, "${track.title} added to queue 📑", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "${track.title} added to queue", Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
@@ -327,7 +327,7 @@ fun TrackItem(
                         onClick = {
                             showMenu = false
                             onRemoveFromQueue()
-                            Toast.makeText(context, "${track.title} removed from queue 🗑️", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "${track.title} removed from queue", Toast.LENGTH_SHORT).show()
                         }
                     )
                 }

@@ -30,7 +30,7 @@ class SettingsViewModel(
     private val playerManager: PlayerManager,
 ) : ViewModel() {
 
-    private val _userName = MutableStateFlow("Sobat Musik")
+    private val _userName = MutableStateFlow("Music Lover")
     val userName: StateFlow<String> = _userName.asStateFlow()
 
     val availableGenres: StateFlow<List<MusicGenre>> = genreRepository.getGenresFlow()
@@ -53,6 +53,20 @@ class SettingsViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = AudioQuality.HIGH
         )
+
+    val themeMode: StateFlow<com.asla.denge.domain.model.ThemeMode> = settingsRepository.getThemeMode()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = settingsRepository.getThemeModeSync()
+        )
+
+    fun setThemeMode(mode: com.asla.denge.domain.model.ThemeMode) {
+        viewModelScope.launch {
+            settingsRepository.setThemeMode(mode)
+        }
+    }
+
 
     private val _usedCacheSizeFormatted = MutableStateFlow("0 MB")
     val usedCacheSizeFormatted: StateFlow<String> = _usedCacheSizeFormatted.asStateFlow()
@@ -96,13 +110,13 @@ class SettingsViewModel(
 
     fun loadUserProfile() {
         viewModelScope.launch {
-            val name = authRepository.getUserName() ?: "Sobat Musik"
+            val name = authRepository.getUserName() ?: "Music Lover"
             _userName.value = name
         }
     }
 
     fun setUserName(name: String) {
-        val cleanName = name.trim().ifBlank { "Sobat Musik" }
+        val cleanName = name.trim().ifBlank { "Music Lover" }
         viewModelScope.launch {
             authRepository.setUserName(cleanName)
             _userName.value = cleanName

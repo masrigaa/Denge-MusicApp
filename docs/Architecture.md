@@ -57,6 +57,7 @@ AdsFreeMusic/
 │   │       │   │   │   ├── MiniPlayer.kt        # Persistent floating bottom player
 │   │       │   │   │   ├── TrackItem.kt         # Track list item, menu (⋮), queue actions
 │   │       │   │   │   ├── TrackArtwork.kt      # Rounded album artwork & fallback placeholder
+│   │       │   │   │   ├── SleepTimerDialog.kt  # Custom sleep timer modal with slider & End of Track
 │   │       │   │   │   ├── GenreSelectionDialog.kt # Modal dialog for managing Home genres
 │   │       │   │   │   └── NameInputDialog.kt   # Dialog for updating listener profile name
 │   │       │   │   ├── navigation/              # NavHost, NavRoutes, BottomNavigationBar
@@ -200,4 +201,4 @@ Compose UI ◀── StateFlow<SearchUiState> ◀── MusicRepository.search()
 
 ---
 
-*Last updated: October 21, 2026 • Architecture Specification Version 2.0.17*
+*Last updated: November 2026 • Architecture Specification Version 2.1.7*

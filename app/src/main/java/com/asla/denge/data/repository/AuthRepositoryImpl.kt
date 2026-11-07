@@ -29,7 +29,7 @@ class AuthRepositoryImpl(
 
     override fun hasCustomUserName(): Boolean {
         val name = prefs.getString(KEY_USER_NAME, null)
-        return !name.isNullOrBlank() && !name.equals("Sobat Musik", ignoreCase = true)
+        return !name.isNullOrBlank() && !name.equals("Sobat Musik", ignoreCase = true) && !name.equals("Music Lover", ignoreCase = true)
     }
 
     override suspend fun getUserName(): String? {

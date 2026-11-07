@@ -65,12 +65,14 @@ fun SettingsScreen(
     val usedCacheSize by viewModel.usedCacheSizeFormatted.collectAsState()
     val sleepTimerRemaining by viewModel.sleepTimerRemainingSeconds.collectAsState()
     val activeSleepTimerOption by viewModel.activeSleepTimerOption.collectAsState()
+    val themeMode by viewModel.themeMode.collectAsState()
 
     var showEqDialog by remember { mutableStateOf(false) }
     var showEditNameDialog by remember { mutableStateOf(false) }
     var showGenreDialog by remember { mutableStateOf(false) }
     var showQualityDialog by remember { mutableStateOf(false) }
     var showSleepTimerDialog by remember { mutableStateOf(false) }
+    var showThemeDialog by remember { mutableStateOf(false) }
     var showClearCacheDialog by remember { mutableStateOf(false) }
     var inputName by remember { mutableStateOf("") }
 
@@ -87,6 +89,7 @@ fun SettingsScreen(
             isFirstTimeOnboarding = false,
         )
     }
+
 
     // Edit Profile Name Dialog
     if (showEditNameDialog) {
@@ -315,16 +318,16 @@ fun SettingsScreen(
             ) {
                 Column {
                     val sleepTimerText = when {
-                        sleepTimerRemaining == -1L -> "End of Track 🎵"
+                        sleepTimerRemaining == -1L -> "End of Track"
                         sleepTimerRemaining != null && sleepTimerRemaining!! > 0L -> {
                             val mins = sleepTimerRemaining!! / 60
                             val secs = sleepTimerRemaining!! % 60
-                            String.format(java.util.Locale.US, "%02d:%02d ⏳", mins, secs)
+                            String.format(java.util.Locale.US, "%02d:%02d", mins, secs)
                         }
                         else -> "Off"
                     }
                     SettingsRow(
-                        title = "Sleep Timer",
+                        title = "Timer",
                         value = sleepTimerText,
                         onClick = { showSleepTimerDialog = true },
                         isInteractive = true,
@@ -358,16 +361,22 @@ fun SettingsScreen(
                     .padding(horizontal = 16.dp, vertical = 4.dp),
             ) {
                 Column {
+                    val themeLabel = when (themeMode) {
+                        com.asla.denge.domain.model.ThemeMode.SYSTEM -> "System (Auto)"
+                        com.asla.denge.domain.model.ThemeMode.LIGHT -> "Light (Brew & Bean)"
+                        com.asla.denge.domain.model.ThemeMode.DARK -> "Dark (Warm Charcoal)"
+                    }
                     SettingsRow(
                         title = "App Theme",
-                        value = "Brew & Bean Coffee ☕",
-                        onClick = null,
-                        isInteractive = false,
+                        value = themeLabel,
+                        onClick = { showThemeDialog = true },
+                        isInteractive = true,
                     )
+
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     SettingsRow(
                         title = "Hardware Audio Offload",
-                        value = "Enabled (DSP) ⚡",
+                        value = "Enabled (DSP)",
                         onClick = null,
                         isInteractive = false,
                     )
@@ -510,50 +519,61 @@ fun SettingsScreen(
     }
 
     if (showSleepTimerDialog) {
-        val timerOptions = listOf(
-            Triple(15, "15 Minutes", "Stops playback after 15 minutes"),
-            Triple(30, "30 Minutes", "Stops playback after 30 minutes"),
-            Triple(45, "45 Minutes", "Stops playback after 45 minutes"),
-            Triple(60, "60 Minutes", "Stops playback after 1 hour"),
-            Triple(-1, "End of Track 🎵", "Stops when current song finishes"),
-        )
-        AlertDialog(
+        com.asla.denge.ui.components.SleepTimerDialog(
+            initialMinutes = activeSleepTimerOption,
             onDismissRequest = { showSleepTimerDialog = false },
+            onSetTimer = { mins -> viewModel.setSleepTimer(mins) },
+            onResetTimer = { viewModel.cancelSleepTimer() },
+        )
+    }
+
+    if (showThemeDialog) {
+        AlertDialog(
+            onDismissRequest = { showThemeDialog = false },
             title = {
                 Text(
-                    text = "Sleep Timer",
+                    text = "Select Theme",
                     style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    timerOptions.forEach { (mins, title, subtitle) ->
-                        val isSelected = activeSleepTimerOption == mins
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    com.asla.denge.domain.model.ThemeMode.entries.forEach { mode ->
+                        val isSelected = themeMode == mode
+                        val (label, description) = when (mode) {
+                            com.asla.denge.domain.model.ThemeMode.SYSTEM ->
+                                Pair("System Default", "Follows device system theme setting")
+                            com.asla.denge.domain.model.ThemeMode.LIGHT ->
+                                Pair("Light (Brew & Bean)", "Warm coffee cream tones")
+                            com.asla.denge.domain.model.ThemeMode.DARK ->
+                                Pair("Dark (Warm Charcoal)", "Warm charcoal espresso tones")
+                        }
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                                    if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
                                     else androidx.compose.ui.graphics.Color.Transparent
                                 )
                                 .clickable {
-                                    viewModel.setSleepTimer(mins)
-                                    showSleepTimerDialog = false
+                                    viewModel.setThemeMode(mode)
+                                    showThemeDialog = false
                                 }
-                                .padding(12.dp),
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = title,
+                                    text = label,
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                                     color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
-                                    text = subtitle,
+                                    text = description,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -567,40 +587,17 @@ fun SettingsScreen(
                             }
                         }
                     }
-
-                    if (activeSleepTimerOption != null) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))
-                                .clickable {
-                                    viewModel.cancelSleepTimer()
-                                    showSleepTimerDialog = false
-                                }
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = "Turn off timer",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.weight(1f),
-                            )
-                        }
-                    }
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showSleepTimerDialog = false }) {
+                TextButton(onClick = { showThemeDialog = false }) {
                     Text("Close", color = MaterialTheme.colorScheme.primary)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
         )
     }
+
 
     if (showClearCacheDialog) {
         AlertDialog(

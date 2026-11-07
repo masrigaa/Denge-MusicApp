@@ -243,4 +243,4 @@ These files/directories should **never** be modified without explicit approval:
 
 ---
 
-*Last updated: October 21, 2026 • Development Guidelines Version 2.0.17*
+*Last updated: November 2026 • Development Guidelines Version 2.1.7*

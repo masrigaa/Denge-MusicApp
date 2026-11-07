@@ -59,7 +59,8 @@ This document defines **what** Déngé is, **who** its target users are, and **w
   - **Equalizer Presets**: Sound adjustments with instant presets (Bass Boost, Vocal, Rock, Flat, etc.).
 - **Profile & Customization**:
   - **Edit Profile Name**: Local display name dialog with zero Google login requirement.
-  - **Theme Info**: Brew & Bean Coffee style aesthetic.
+  - **Theme Engine**: Dual Theme Engine (Brew & Bean Light, Warm Charcoal Dark, and System Default).
+  - **Smart Sleep Timer**: Intuitive timer dialog with custom slider (5 to 120 minutes) and "End of track" completion mode.
   - **Audio Quality**: High Quality Opus Audio Stream indicator.
   - **App Version**: Current release info.
 
@@ -93,4 +94,4 @@ This document defines **what** Déngé is, **who** its target users are, and **w
 
 ---
 
-*Last updated: October 21, 2026 • Product Specification Version 2.0.17*
+*Last updated: November 2026 • Product Specification Version 2.1.7*

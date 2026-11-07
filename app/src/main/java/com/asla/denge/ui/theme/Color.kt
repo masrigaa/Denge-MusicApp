@@ -41,3 +41,83 @@ val CoffeeDangerBg = Color(0xFFFBECE9)
 val CoffeeSuccess = Color(0xFF388E3C)
 val CoffeeSuccessBg = Color(0xFFE8F5E9)
 
+/**
+ * Semantic role-based colors for Déngé design system.
+ * Supports both Light (Brew & Bean) and Dark (Arang hangat) palettes.
+ */
+data class DengeColors(
+    val canvas: Color,
+    val surface: Color,
+    val card: Color,
+    val surfaceMuted: Color,
+    val header: Color,
+    val headerWarm: Color,
+    val primary: Color,
+    val onPrimary: Color,
+    val secondary: Color,
+    val accent: Color,
+    val highlight: Color,
+    val text: Color,
+    val textMuted: Color,
+    val textPlaceholder: Color,
+    val border: Color,
+    val borderSubtle: Color,
+    val danger: Color,
+    val dangerBg: Color,
+    val success: Color,
+    val successBg: Color,
+)
+
+val LightDengeColors = DengeColors(
+    canvas = CoffeeCanvas,
+    surface = CoffeeSurface,
+    card = CoffeeCard,
+    surfaceMuted = CoffeeSurfaceMuted,
+    header = CoffeeHeader,
+    headerWarm = CoffeeHeaderWarm,
+    primary = EspressoBrown,
+    onPrimary = OnEspresso,
+    secondary = CaramelBrown,
+    accent = TanAccent,
+    highlight = GoldenCaramel,
+    text = TextEspresso,
+    textMuted = TextMuted,
+    textPlaceholder = TextPlaceholder,
+    border = CoffeeBorder,
+    borderSubtle = CoffeeBorderSubtle,
+    danger = CoffeeDanger,
+    dangerBg = CoffeeDangerBg,
+    success = CoffeeSuccess,
+    successBg = CoffeeSuccessBg,
+)
+
+/**
+ * "Arang hangat" Dark Theme palette.
+ * Warm charcoal aesthetic preserving the coffee soul without harsh pure blacks.
+ */
+val DarkDengeColors = DengeColors(
+    canvas = Color(0xFF161514),
+    surface = Color(0xFF1F1D1B),
+    card = Color(0xFF282522),
+    surfaceMuted = Color(0xFF34302C),
+    header = CoffeeHeader, // #3E2A1E
+    headerWarm = Color(0xFF2E2A26),
+    primary = TanAccent, // #A88569
+    onPrimary = TextEspresso, // #2C1A10
+    secondary = Color(0xFFC19A78),
+    accent = TanAccent,
+    highlight = GoldenCaramel,
+    text = OnEspresso, // #F4EBE1
+    textMuted = Color(0xFFB3A99E),
+    textPlaceholder = Color(0xFF857B72),
+    border = Color(0xFF3A3632),
+    borderSubtle = Color(0xFF2E2B28),
+    danger = Color(0xFFE57C63),
+    dangerBg = Color(0xFF3A2521),
+    success = Color(0xFF81C784),
+    successBg = Color(0xFF1F3322),
+)
+
+val LocalDengeColors = androidx.compose.runtime.staticCompositionLocalOf { LightDengeColors }
+
+

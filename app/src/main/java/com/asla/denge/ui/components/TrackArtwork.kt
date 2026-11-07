@@ -28,13 +28,15 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.asla.denge.util.toHdThumbnailUrl
 
+// Intentionally theme-independent: Physical album artwork simulation and vinyl disc fallback gradient
 private val TrackArtworkFallbackGradient = Brush.linearGradient(
     colors = listOf(
-        Color(0xFF4A3728), // Warm espresso
-        Color(0xFF7B5E43), // Rich caramel wood
-        Color(0xFF2E1C14), // Dark roast
+        Color(0xFF4A3728), // Warm espresso vinyl sleeve
+        Color(0xFF7B5E43), // Rich caramel wood tone
+        Color(0xFF2E1C14), // Dark roast vinyl record
     )
 )
+
 
 /**
  * Universal Track Artwork component.
@@ -76,20 +78,21 @@ fun TrackArtwork(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            // Subtle initial letter in center
+            // Subtle initial letter in center (Theme-independent vinyl stamp)
             Text(
                 text = initial,
                 fontSize = (iconSize.value * 0.9f).sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFFD7CCC8).copy(alpha = 0.45f),
+                color = Color(0xFFD7CCC8).copy(alpha = 0.45f), // Theme-independent: Vinyl groove watermark
             )
             // Foreground music icon
             Icon(
                 imageVector = Icons.Default.MusicNote,
                 contentDescription = null,
-                tint = Color(0xFFFFD180).copy(alpha = 0.75f),
+                tint = Color(0xFFFFD180).copy(alpha = 0.75f), // Theme-independent: Gold vinyl center label
                 modifier = Modifier.size(iconSize),
             )
+
         }
 
         // Live artwork image

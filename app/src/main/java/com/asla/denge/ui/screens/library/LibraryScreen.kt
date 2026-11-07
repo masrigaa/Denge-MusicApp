@@ -356,7 +356,7 @@ fun LibraryScreen(
                                 EmptyStateView(
                                     icon = Icons.Default.Favorite,
                                     title = "No Liked Songs Yet",
-                                    description = "Tap the heart ❤️ button in the player to add your favorite songs here.",
+                                    description = "Tap the heart button in the player to add your favorite songs here.",
                                 )
                             } else {
                                 LazyColumn(

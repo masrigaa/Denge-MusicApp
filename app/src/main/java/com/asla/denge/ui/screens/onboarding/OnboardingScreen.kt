@@ -69,7 +69,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -92,7 +94,7 @@ import org.koin.compose.koinInject
  * Editorial Anime/Manga Onboarding Flow (v2.0.4).
  * - Image merges seamlessly into the background without box borders
  * - Suggestions chip cleanly wraps whole name block without word splitting
- * - Floating dialog ("kotak melayang") for custom genre setup like v1.5.6
+ * - Floating dialog for custom genre setup like v1.5.6
  * - Fixed persistent bottom button raised comfortably above system navigation bar
  * - Mandatory setup with zero skip
  */
@@ -268,8 +270,8 @@ fun OnboardingScreen(
             ) {
                 FloatingActionButton(
                     onClick = { currentStep -= 1 },
-                    containerColor = Color(0xFF2C1D17),
-                    contentColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     shape = CircleShape,
                     elevation = FloatingActionButtonDefaults.elevation(
                         defaultElevation = 2.dp,
@@ -281,17 +283,18 @@ fun OnboardingScreen(
                         .size(42.dp)
                         .border(
                             1.dp,
-                            Color(0xFF5A3E31).copy(alpha = 0.6f),
+                            MaterialTheme.colorScheme.outlineVariant,
                             CircleShape
                         ),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(20.dp),
                     )
                 }
+
             }
         }
     }
@@ -302,19 +305,35 @@ fun OnboardingScreen(
  */
 @Composable
 private fun EditorialGreetingStep() {
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val artworkRes = if (isDark) R.drawable.onboarding_anime_art_dark else R.drawable.onboarding_anime_art
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Seamless Anime/Manga Artwork without any enclosing card box or hard clipping
-        Image(
-            painter = painterResource(id = R.drawable.onboarding_anime_art),
-            contentDescription = "Déngé Anime Music Artwork",
-            contentScale = ContentScale.FillWidth,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        // Seamless Anime/Manga Artwork with bottom fade gradient to dissolve into canvas
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Image(
+                painter = painterResource(id = artworkRes),
+                contentDescription = "Déngé Anime Music Artwork",
+                contentScale = ContentScale.FillWidth,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            // Bottom fade gradient ensuring zero sharp boundary in both dark and light modes
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.verticalGradient(
+                            0.70f to Color.Transparent,
+                            1.0f to MaterialTheme.colorScheme.background,
+                        )
+                    )
+            )
+        }
 
         Spacer(modifier = Modifier.height(14.dp))
 
@@ -351,6 +370,7 @@ private fun EditorialGreetingStep() {
                 )
 
                 // Hand-drawn brush underline curve
+                val flourishColor = MaterialTheme.colorScheme.secondary
                 Canvas(modifier = Modifier.size(width = 160.dp, height = 7.dp)) {
                     val path = Path().apply {
                         moveTo(4.dp.toPx(), 3.5.dp.toPx())
@@ -361,10 +381,11 @@ private fun EditorialGreetingStep() {
                     }
                     drawPath(
                         path = path,
-                        color = Color(0xFF73513C),
+                        color = flourishColor,
                         style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
                     )
                 }
+
             }
 
             Spacer(modifier = Modifier.height(12.dp))
